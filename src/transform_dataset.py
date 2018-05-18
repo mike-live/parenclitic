@@ -4,33 +4,44 @@ from transform_data import *
 from sklearn.model_selection import train_test_split
 from gen_files.genes_mean_and_std import generate_genes_mean_and_std
 import os.path
+import sys
 
 project_path = '/home/krivonosov_m/Projects/Gerontology/'
 
 data_path = project_path + 'data/GSE40279/'
 
 x_file_name = 'gene_mean.txt'
+ranged_genes_file_name = 'ranged_genes_anova.txt'
 y_file_name = 'ages.txt'
 xp_file_name = 'parenclitic_features.txt'
 
 x_file_path = data_path + x_file_name
 y_file_path = data_path + y_file_name
 xp_file_path = data_path + xp_file_name
+ranged_genes_file_path = data_path + ranged_genes_file_name
 
 if not os.path.exists(x_file_path):
     generate_genes_mean_and_std(data_path)
 
-
 X = np.genfromtxt(x_file_path, delimiter=' ')[:, 1:]
-genes_names = np.genfromtxt(x_file_path, dtype='str', usecols=1)
+genes_names = np.genfromtxt(x_file_path, dtype='str', usecols = 0)
+genes_dict = dict((v, i) for i, v in enumerate(genes_names))
 y = np.loadtxt(y_file_path)
 
+ranged_genes = np.genfromtxt(ranged_genes_file_path, dtype='str', usecols = 0)
+
+indices = np.array([genes_dict[x] for x in ranged_genes])
+
+X = X[indices, :].T
+
 print X.shape
-print y.shape
 
+median_age = np.median(ages)
+print median_age
+min_age = np.min(ages)
+max_age = np.max(ages)
 
-'''
-ages_edges = [0, 58, 100]
+ages_edges = [min_age, median_age, max_age]
 
 X_prob, _, y_prob, _ = train_test_split(
     X, y, test_size=0.1, random_state=42)
@@ -51,4 +62,3 @@ stop = timeit.default_timer()
 print 'Parenclitic transform elapsed: ', stop - start 
 
 np.savetxt(xp_file_path, Xp)
-'''
