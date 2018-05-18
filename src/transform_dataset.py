@@ -20,7 +20,9 @@ xp_file_path = data_path + xp_file_name
 if not os.path.exists(x_file_path):
     generate_genes_mean_and_std(data_path)
 
-X = np.loadtxt(x_file_path)
+
+X = np.genfromtxt(x_file_path, delimiter=' ')[:, 1:]
+genes_names = np.genfromtxt(x_file_path, dtype='str', usecols=1)
 y = np.loadtxt(y_file_path)
 
 print X.shape
