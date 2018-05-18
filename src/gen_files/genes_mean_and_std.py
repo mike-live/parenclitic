@@ -1,7 +1,6 @@
 import os.path
 import math
 import numpy as np
-import pandas as pd
 import scipy.stats as stats
 from dicts import get_dict_cpg_gene
 

@@ -5,7 +5,9 @@ from sklearn.model_selection import train_test_split
 from gen_files.genes_mean_and_std import generate_genes_mean_and_std
 import os.path
 
-data_path = 'Input/GSE40279/'
+project_path = '/home/krivonosov_m/Projects/Gerontology/'
+
+data_path = project_path + 'data/GSE40279/'
 
 x_file_name = 'gene_mean.txt'
 y_file_name = 'ages.txt'
