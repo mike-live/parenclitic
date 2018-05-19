@@ -1,9 +1,14 @@
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.pylab as pylab
+
+import sys
 import igraph
 import scipy.stats as stats
 import scipy.integrate as integrate
 import numpy as np
 import timeit
-
 
 def calc_edge_weight(feature_i, feature_j, kde, p, I, min_x, max_x):
 #    start = timeit.default_timer()
@@ -37,7 +42,7 @@ def make_graph(w, threshold_p):
     for i in range(n):
         for j in range(n):
             if i <= j: continue
-            if w[i, j] > threshold_p:
+            if w[i, j] < threshold_p:
                  g.add_edge(i, j, weight = w[i, j])
     return g
 
@@ -76,8 +81,9 @@ def calculate_metrics(g, w, need_weights = False):
 
     shortest_paths = np.array(g.shortest_paths(weights = weights))
     shortest_paths = shortest_paths[(shortest_paths > 0) & (shortest_paths != np.inf)]
-    # Strange formula from R code mean(1 / shortest_paths) * len(shortest_paths) / (g.vcount() * (g.vcount() - 1))
-    efficency = (1.0 / shortest_paths).mean() / (g.vcount() * (g.vcount() - 1))
+    efficency = 0
+    if len(shortest_paths) > 0:
+        efficency = (1.0 / shortest_paths).sum() / (g.vcount() * (g.vcount() - 1))
     # In paper Latora V., Marchiori M.: Efficient behavior of small-world networks. Phys. Rev. Lett. 87 (Article No. 198701) (2001)
     # suggested to normalize by efficiency for threshold_p = 0 (cause graph has all edges when thr_p = 0)
     parenclitic[3] = efficency
@@ -124,7 +130,6 @@ def calculate_metrics(g, w, need_weights = False):
     
     start = timeit.default_timer()
 
-
     # alpha centrality with alpha = 1
     eigenvector_centrality = g.eigenvector_centrality(weights = weights)
     parenclitic[13] = np.mean(eigenvector_centrality)
@@ -134,7 +139,6 @@ def calculate_metrics(g, w, need_weights = False):
     print 'Parenclitic 6', stop - start
     
     start = timeit.default_timer()
-
 
     parenclitic[14] = g.ecount()
 
@@ -149,19 +153,12 @@ def calculate_metrics(g, w, need_weights = False):
     print 'Parenclitic 7', stop - start
     
     start = timeit.default_timer()
-
-
     parenclitic[18] = g.community_edge_betweenness().optimal_count
-
     stop = timeit.default_timer()
     print 'Parenclitic 8', stop - start
     
     start = timeit.default_timer()
-
-
     parenclitic[19] = robustness(g)
-
-
     stop = timeit.default_timer()
     print 'Parenclitic 9', stop - start
     
@@ -172,7 +169,7 @@ def parenclitic_num_features():
     return 20
 
 
-def parenclitic_transform(x, kdes, p, I, threshold_p = 0.5, min_x = 0, max_x = 1):
+def parenclitic_transform(x, kdes, p, I, threshold_p = 0.5, min_x = 0, max_x = 1, graph_path = '', id_patient = -1, genes_names = []):
     start = timeit.default_timer()
     w = make_weights(x, kdes, p, I, min_x, max_x)
     stop = timeit.default_timer()
@@ -183,6 +180,13 @@ def parenclitic_transform(x, kdes, p, I, threshold_p = 0.5, min_x = 0, max_x = 1
     stop = timeit.default_timer()
     print 'Make graph', stop - start
 
+    if False and graph_path != '':
+        g.vs["label"] = genes_names
+        if g.ecount() > 0:
+            g.es["label"] = g.es["weight"]
+        layout = g.layout("fr")
+        igraph.plot(g, graph_path, bbox = (1024, 1024), layout = layout, vertex_size = 20)
+
     parenclitic = calculate_metrics(g, w)
     return parenclitic
 
@@ -192,17 +196,20 @@ def parenclitic_kdes(X, min_x = 0, max_x = 1):
     kdes = np.empty((k, k), dtype=object)
     print kdes.shape
     num_points = 10000
-    points = np.random.rand(2, num_points) * (max_x - min_x) + min_x
-    
     p = np.zeros((k, k, num_points), dtype=np.float32)
     I = np.zeros((k, k, num_points + 1), dtype=np.float32)
-    S = (max_x - min_x) ** 2
     for i in range(k):
+        start = timeit.default_timer()
         for j in range(k):
             if (i == j): continue
             data = np.array([X[:, i], X[:, j]])
             kde = stats.gaussian_kde(data)
+            points = kde.resample(num_points)
             p[i, j] = np.sort(np.array(kde(points)))
-            I[i, j] = np.concatenate([[0], np.cumsum(p[i, j]) * S])
+            I[i, j] = np.concatenate([[0], np.cumsum(p[i, j])])
             kdes[i, j] = kde
+        stop = timeit.default_timer()
+        print 'KDE for ', i, 'calculated in ', stop - start
+        sys.stdout.flush()
+
     return kdes, p, I
