@@ -13,11 +13,11 @@ project_path = '/home/krivonosov_m/Projects/Gerontology/'
 data_path = project_path + 'data/GSE40279/'
 
 x_file_name = 'gene_mean.txt'
-ranged_genes_file_name = 'pvals_mean_genes.txt'
-#ranged_genes_file_name = 'all_gene_importance_RF_2class.csv'
+#ranged_genes_file_name = 'pvals_mean_genes.txt'
+ranged_genes_file_name = 'all_gene_importance_RF_2class.csv'
 y_file_name = 'ages.txt'
-xp_file_name = 'parenclitic_features_anova.txt'
-#xp_file_name = 'parenclitic_features_RF.txt'
+#xp_file_name = 'parenclitic_features_anova.txt'
+xp_file_name = 'parenclitic_features_RF.txt'
 
 x_file_path = data_path + x_file_name
 y_file_path = data_path + y_file_name
@@ -50,7 +50,7 @@ print X.dtype, X.shape
 
 sys.stdout.flush()
 
-num_genes = 400
+num_genes = 10
 
 #X = np.random.rand(len(genes_names), 656)
 genes_names = ranged_genes[:num_genes]
@@ -69,18 +69,19 @@ max_age = np.max(y)
 ages_edges = [min_age, median_age, max_age]
 
 X_prob, _, y_prob, _ = train_test_split(
-    X, y, test_size=0.1, random_state=42)
+    X, y, test_size=0.9, random_state=42)
 
 start = timeit.default_timer()
 mask = y_prob < ages_edges[1]
-kdes, p, I = parenclitic_kdes(X_prob[mask]) # Not old
+print mask.sum(), y_prob.shape, ages_edges[1]
+kdes, p, I = parenclitic_kdes(X_prob[mask, :]) # Not old
 stop = timeit.default_timer()
 print 'Parenclitic kdes elapsed: ', stop - start 
 sys.stdout.flush()
 
-#plot_parenclitic_kdes(kde_path, X, y, mask, kdes, p, I, genes_names)
+plot_parenclitic_kdes(kde_path, X, y, mask, kdes, p, I, genes_names)
 
-
+'''
 start = timeit.default_timer()
 
 Xp = np.zeros((X.shape[0], parenclitic_num_features()), dtype = np.float32)
@@ -93,5 +94,6 @@ print(Xp[0, :])
 stop = timeit.default_timer()
 print 'Parenclitic transform elapsed: ', stop - start 
 
-np.savetxt(xp_file_path, Xp)
+#np.savetxt(xp_file_path, Xp)
 
+'''

@@ -9,11 +9,12 @@ import scipy.stats as stats
 import scipy.integrate as integrate
 import numpy as np
 import timeit
+from sklearn.neighbors.kde import KernelDensity
 
 def calc_edge_weight(feature_i, feature_j, kde, p, I, min_x, max_x):
 #    start = timeit.default_timer()
     
-    q = kde([feature_i, feature_j])
+    q = kde(np.array([feature_i, feature_j])) # .reshape(1, -1)
     pos = np.searchsorted(p, q)
     w = (I[pos] + q * (p.size - pos)) / p.size
 #    print p
@@ -194,7 +195,7 @@ def parenclitic_transform(x, kdes, p, I, threshold_p = 0.5, min_x = 0, max_x = 1
 def parenclitic_kdes(X, min_x = 0, max_x = 1):
     k = X.shape[1]
     kdes = np.empty((k, k), dtype=object)
-    print kdes.shape
+    print kdes.shape, X.shape
     num_points = 10000
     p = np.zeros((k, k, num_points), dtype=np.float32)
     I = np.zeros((k, k, num_points + 1), dtype=np.float32)
@@ -202,10 +203,14 @@ def parenclitic_kdes(X, min_x = 0, max_x = 1):
         start = timeit.default_timer()
         for j in range(k):
             if (i == j): continue
-            data = np.array([X[:, i], X[:, j]])
+            data = np.array([X[:, i], X[:, j]]).astype('float32')
+#            kde = KernelDensity(kernel='gaussian', algorithm='kd_tree', rtol=1.0e-4, atol=1.0e-4).fit(data)
             kde = stats.gaussian_kde(data)
             points = kde.resample(num_points)
-            p[i, j] = np.sort(np.array(kde(points)))
+            pr = np.array(kde(points))
+            #points = kde.sample(num_points)
+            #pr = np.array(kde.score_samples(points))
+            p[i, j] = np.sort(pr)
             I[i, j] = np.concatenate([[0], np.cumsum(p[i, j])])
             kdes[i, j] = kde
         stop = timeit.default_timer()
@@ -213,3 +218,42 @@ def parenclitic_kdes(X, min_x = 0, max_x = 1):
         sys.stdout.flush()
 
     return kdes, p, I
+
+'''
+def parenclitic_graphs(X_prob, X, threshold_p = 0.5, min_x = 0, max_x = 1):
+    k = X.shape[1]
+    print kdes.shape
+    num_points = 10000
+    p = np.zeros((num_points), dtype=np.float32)
+    I = np.zeros((num_points + 1), dtype=np.float32)
+    G = np.zeros((X.shape[0], k, k), dtype=np.bool)
+    for i in range(k):
+        start = timeit.default_timer()
+        for j in range(k):
+            if (i == j): continue
+            data = np.array([X_prob[:, i], X_prob[:, j]])
+            kde = stats.gaussian_kde(data)
+            points = kde.resample(num_points)
+            pr = np.array(kde(points))
+#            kde = KernelDensity(kernel='gaussian').fit(data)
+#            points = kde.sample(num_points)
+#            pr = np.array(kde.score_samples(points))
+            pr.sort()
+            I = np.concatenate([np.cumsum(pr), [1]])
+            ind = np.flatnonzero(I >= threshold_p)[0]
+            data = np.array([X[:, i], X[:, j]])
+            #p = np.array(kde.score_samples(points))
+            p = np.array(kde(points))
+            if ind < pr.size:
+                q = pr[ind]
+                G[:, i, j] = p < q
+
+
+
+        stop = timeit.default_timer()
+        print 'KDE for ', i, 'calculated in ', stop - start
+        sys.stdout.flush()
+
+    return 
+
+'''
