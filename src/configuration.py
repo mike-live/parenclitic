@@ -32,6 +32,8 @@ class param:
 
     def set_tick(self, id_tick):
         self.id_tick = id_tick
+        if id_tick >= self.num_ticks or id_tick < 0:
+            raise IndexError
         if isinstance(self.value_be, (np.floating, float, int)) and isinstance(self.value_en, (np.floating, float, int)):
             if self.num_ticks > 1: self.value = (self.value_en - self.value_be) * id_tick / (self.num_ticks - 1) + self.value_be
             else: self.value = value_be
@@ -46,8 +48,23 @@ class param:
         values = map (self.set_tick, range(self.num_ticks))
         return values
 
-                
-    
+    def __iter__(self):
+        self.id_tick = -1
+        return self
+
+    def next(self):
+        try:
+            value = self.set_tick(self.id_tick + 1)
+        except IndexError:
+            raise StopIteration
+        return value
+
+    def __len__(self):
+        return self.num_ticks
+
+    def __getitem__(self, id_tick = 0):
+        return self.set_tick(id_tick)
+
 def set_params(params, id_tick):
     for name, param in params.iteritems():
         if not param.is_const and not param.manual_ticks:

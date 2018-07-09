@@ -15,6 +15,8 @@ import numpy as np
 import timeit
 from sklearn.neighbors.kde import KernelDensity
 
+feature_names = []
+
 def calc_edge_weight(feature_i, feature_j, kde, p, I, min_x, max_x):
 #    start = timeit.default_timer()
     
@@ -176,6 +178,37 @@ def calculate_metrics(g, w, need_weights = False):
 
     assert(parenclitic.size == parenclitic_num_features())
     return parenclitic
+
+def parenclitic_feature_names():
+    feature_names = [''] * parenclitic_num_features()
+    feature_names[0] = 'Max degrees'
+    feature_names[1] = 'Mean degrees'
+    feature_names[2] = 'Std degrees'
+    
+    feature_names[3] = 'Efficency'
+    feature_names[4] = 'Max betweenness'
+    feature_names[5] = 'Mean betweenness'
+    feature_names[6] = 'Std betweenness'
+    
+    feature_names[7] = 'Max closeness'
+    feature_names[8] = 'Mean closeness'
+    feature_names[9] = 'Std closeness'
+    
+    feature_names[10] = 'Max pagerank'
+    feature_names[11] = 'Mean pagerank'
+    feature_names[12] = 'Std pagerank'
+    
+    feature_names[13] = 'Mean eigenvector centrality'
+    feature_names[14] = 'Number of edges'
+
+    feature_names[15] = 'Max weights'
+    feature_names[16] = 'Mean weights'
+    feature_names[17] = 'Std weights'
+    
+    feature_names[18] = 'Community edge betweenness: optimal count'
+        
+    feature_names[19] = 'Robustness'
+    return feature_names    
 
 def parenclitic_num_features():
     return 20
