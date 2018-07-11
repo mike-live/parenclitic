@@ -125,7 +125,7 @@ class configuration:
         if type(names) is list:
             for name in names:
                 if type(name) is list:
-                    path /= delimiter.join(map(lambda xname: self.files.get(xname, xname), name))
+                    path /= delimiter.join(map(lambda xname: str(self.files.get(xname, xname)), name))
                 else:
                     path /= self.files.get(name, name)
         else:
