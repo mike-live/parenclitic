@@ -33,6 +33,7 @@ files = {
     "degrees_all": 'degrees_all',
     "parenclitic_all": "parenclitic_all",
     "diff_graph": 'diff_graph',
+    "pair_genes": Path('pair_genes') / 'pair_genes',
 }
 
 params_sets = {
@@ -45,6 +46,7 @@ params_sets = {
     "degrees_boxplots": set(['kde_mask', 'num_genes']),
     "parenclitic_boxplots": set(['kde_mask', 'num_genes']),
     "diff_graph": set(['kde_mask', 'num_genes']),
+    "pair_genes": set(['kde_mask', 'num_genes', 'id_pair'])
 }
 
 config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'mongoloids', params_sets = params_sets)
