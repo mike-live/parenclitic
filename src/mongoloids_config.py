@@ -20,11 +20,12 @@ params = collections.OrderedDict([
 ])
 
 files = {
+    "gene_chromosome": 'gene_chr.txt',
     "x": 'gene_mean_islands_shores.txt',
     "name_genes": 'linreg_genes_mean_islands_shores',
     #"ranged_genes": 'linreg_genes_mean_islands_shores.txt',
     "g": 'graph',
-    "kdes": 'kdes',
+    "kdes": Path('kdes') / 'kdes',
     "graphs": 'graphs',
     "degrees": Path('degrees') / 'degrees',
     "parenclitic": Path("parenclitics") / "parenclitic",
@@ -34,6 +35,8 @@ files = {
     "parenclitic_all": "parenclitic_all",
     "diff_graph": 'diff_graph',
     "pair_genes": Path('pair_genes') / 'pair_genes',
+    "kdes_dist": Path('kdes_dist') / 'kdes_dist',
+    "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
 }
 
 params_sets = {
@@ -46,7 +49,9 @@ params_sets = {
     "degrees_boxplots": set(['kde_mask', 'num_genes']),
     "parenclitic_boxplots": set(['kde_mask', 'num_genes']),
     "diff_graph": set(['kde_mask', 'num_genes']),
-    "pair_genes": set(['kde_mask', 'num_genes', 'id_pair'])
+    "pair_genes": set(['kde_mask', 'num_genes', 'id_pair']),
+    "kdes": set(['kde_mask', 'num_genes', 'id_pair']),
+    "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'thr_p', 'id_parenclitic']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'mongoloids', params_sets = params_sets)

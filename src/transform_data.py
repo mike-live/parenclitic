@@ -22,7 +22,8 @@ def calc_edge_weight(feature_i, feature_j, kde, p, I, min_x, max_x):
     
     q = kde(np.array([feature_i, feature_j])) # .reshape(1, -1)
     pos = np.searchsorted(p, q)
-    w = (I[pos] + q * (p.size - pos)) / p.size
+    #w = (I[pos] + q * (p.size - pos)) / p.size
+    w = (I[-1] - I[pos]) / p.size
 #    print p
 #    w = np.random.rand()
 #    stop = timeit.default_timer()
@@ -291,10 +292,11 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
     points = kde.resample(num_points)
     pr = np.array(kde(points))
     pr.sort()
-    I = np.concatenate([np.cumsum(pr), [1]])
+    #I = np.concatenate([np.cumsum(pr), [1]])
     G = np.zeros((len(thresholds_p), X_i.shape[0]), dtype=np.bool)
     for i, thr_p in enumerate(thresholds_p):
-        ind = np.flatnonzero(I >= thr_p)[0]
+        #ind = np.flatnonzero(I >= thr_p)[0]
+        ind = int(thr_p * num_points)
         if ind < pr.size:
             q = pr[ind]
             G[i] = p < q
