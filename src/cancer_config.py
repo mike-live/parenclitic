@@ -6,24 +6,20 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_genes", param(15024, name = 'num_genes')), # 15024, 20270
-    ("kde_mask", param('mothers_mask', name = 'kde_mask')),
+    ("num_genes", param(18484, name = 'num_genes')), 
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("thr_p", param(value_be = 0.1, value_en = 0.9, num_ticks = 9, name = 'threshold_p')),
-    ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
+    ("id_sample", param(value_be = 0, value_en = 488, num_ticks = 489, name = 'id_sample')),
     ("num_parts", param(30, name = 'num_parts')),
     ("num_workers", param(30, name = 'num_workers')),
-    ("num_samples", param(87, name = 'num_samples')),
-    ("mongoloids_mask", param(np.arange(0, 29), name = 'mongoloids_mask')),
-    ("siblings_mask", param(np.arange(29, 58), name = 'siblings_mask')),
-    ("mothers_mask", param(np.arange(58, 87), name = 'mothers_mask')),
+    ("num_samples", param(489, name = 'num_samples')),
 ])
 
 files = {
-    "gene_chromosome": 'gene_chr.txt',
-    "x": 'gene_mean_islands_shores.txt',
-    "name_genes": 'linreg_genes_mean_islands_shores',
-    #"ranged_genes": 'linreg_genes_mean_islands_shores.txt',
+    "patients_id": 'patients_id.csv',
+    "classes_blood": 'classes_blood.csv',
+    "x": 'gene_mean_blood.csv',
+
     "g": 'graph',
     "kdes": Path('kdes') / 'kdes',
     "graphs": 'graphs',
@@ -54,4 +50,4 @@ params_sets = {
     "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'thr_p', 'id_parenclitic']),
 }
 
-config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'mongoloids', params_sets = params_sets)
+config = configuration(params, info, files, data_name = '2018.09.01', project_name = 'Cancer', config_name = 'cancer', params_sets = params_sets)

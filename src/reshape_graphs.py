@@ -10,8 +10,12 @@ import time
 #from ages_config import config
 #from load_data_age import load_data_age
 
-from load_data_mongoloids import load_data_mongoloids
-from mongoloids_config import config
+#from load_data_mongoloids import load_data_mongoloids
+#from mongoloids_config import config
+
+from load_data_cancer import load_data_cancer
+from cancer_config import config
+
 
 def reshape_graphs(X):
     print 'Reshape graph'
@@ -33,7 +37,7 @@ def reshape_graphs(X):
 
 if __name__ == '__main__':
     #X, y, _, genes_names = load_data_age()
-    X, y, _, genes_names = load_data_mongoloids()
+    X, y, _, genes_names = load_data_cancer()
 
     config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
     config.params["thr_p"].whole_values = False

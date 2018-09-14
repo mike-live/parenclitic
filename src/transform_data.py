@@ -5,6 +5,7 @@ import matplotlib.pylab as pylab
 
 #from multiprocessing.pool import ThreadPool as Pool
 from multiprocessing.pool import Pool
+from threading import Event, Lock, Semaphore
 
 import sys
 import collections
@@ -310,6 +311,7 @@ def make_genes_edges(X_prob, X, threshold_p):
         G[:, 0, j] = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
     return G
 
+
 def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_values = lambda i, j: i >= j):
     if not isinstance(threshold_p, collections.Iterable):
         threshold_p = [threshold_p]
@@ -327,10 +329,15 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
             num_pairs += 1
     num_bytes = len(np.packbits(np.zeros((X.shape[0], 1),dtype = np.bool)))
     G = np.zeros((len(threshold_p), num_pairs, num_bytes), dtype = np.uint8)
+    print 'G size:', G.nbytes, G.shape
     
     need_parallel = num_workers > 1
     if need_parallel:
         pool = Pool(num_workers)
+        global done_tasks
+        done_tasks = 0
+        global ready
+        ready = Semaphore(num_workers * 10)
 
     start = timeit.default_timer()
     each_progress = int(np.sqrt(num_pairs + 0.5))
@@ -340,10 +347,12 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
             if skip_values(i, j): continue
 
             def upd_graph(g, i = i, j = j, lid = lid):
-                global num_done
+                global num_done, done_tasks, ready
                 gp = np.packbits(g, axis=1)
                 for id_thr, gl in enumerate(gp):
                     G[id_thr][lid] = gl
+                done_tasks += 1
+                ready.release()
 
                 num_done += 1
                 if num_done % each_progress == 0 or num_done == num_pairs:
@@ -352,12 +361,17 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
                     sys.stdout.flush()
 
             if need_parallel:
+                ready.acquire()
                 pool.apply_async(make_genes_edge, args = (X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
             else:
                 g = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
                 upd_graph(g)
 
             lid += 1
+
+    if need_parallel:
+        while done_tasks < num_pairs:
+            ready.acquire()
 
     pool.close()
     pool.join()
