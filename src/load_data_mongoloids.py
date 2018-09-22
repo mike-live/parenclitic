@@ -102,3 +102,29 @@ def load_data_mongoloids_horvath_cpgs():
 
     mask = config.params[config.params["kde_mask"].value].value
     return X, y, X[mask, :], cpgs_names
+
+def load_data_mongoloids_hannum_cpgs():
+    from mongoloids_cpg_hannum_config import config
+    start = timeit.default_timer()
+    X = np.genfromtxt(config.ifname("hannum_cpgs_beta"), dtype='float32', delimiter=' ')[:, 1:]
+
+    cpgs_names  = np.genfromtxt(config.ifname("hannum_cpgs_beta"), dtype='str', usecols = 0)
+    config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
+
+    stop = timeit.default_timer()
+    print 'Data loaded: ', stop - start
+    print X.dtype, X.shape
+
+    sys.stdout.flush()
+
+    X = X.T
+
+    y = np.zeros((X.shape[0], 1), dtype = 'uint8')
+    y[config.params["mongoloids_mask"].value] = 0
+    y[config.params["siblings_mask"].value] = 1
+    y[config.params["mothers_mask"].value] = 2
+    print X.shape, config.params["num_cpgs"].value
+    sys.stdout.flush()
+
+    mask = config.params[config.params["kde_mask"].value].value
+    return X, y, X[mask, :], cpgs_names
