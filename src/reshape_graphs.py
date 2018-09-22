@@ -13,8 +13,11 @@ import time
 #from load_data_mongoloids import load_data_mongoloids
 #from mongoloids_config import config
 
-from load_data_cancer import load_data_cancer
-from cancer_config import config
+from load_data_mongoloids import load_data_mongoloids_horvath_cpgs
+from mongoloids_cpg_horvath_config import config
+
+#from load_data_cancer import load_data_cancer
+#from cancer_config import config
 
 
 def reshape_graphs(X):
@@ -26,7 +29,7 @@ def reshape_graphs(X):
         start_thr = timeit.default_timer()
 
         G = read_graphs(config, X, id_thr)
-        G = extract_graphs(G, config.params["num_genes"].value, X.shape[0])
+        G = extract_graphs(G, X.shape[1], X.shape[0])
         for i, x in enumerate(X):
             config.params["id_sample"].set_tick(i)
             np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]), G = G[i, :, :])
@@ -37,9 +40,9 @@ def reshape_graphs(X):
 
 if __name__ == '__main__':
     #X, y, _, genes_names = load_data_age()
-    X, y, _, genes_names = load_data_cancer()
-
-    config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
+    #X, y, _, genes_names = load_data_cancer()
+    X, y, _, genes_names = load_data_mongoloids_horvath_cpgs()
+    
     config.params["thr_p"].whole_values = False
     config.params["id_sample"].manual_ticks = True 
 
