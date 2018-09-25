@@ -6,17 +6,16 @@ import sys
 def load_data_cancer():
     from cancer_config import config
     start = timeit.default_timer()
-    X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter=' ')[1:, 1:]
+    X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter=' ')[0:, 1:]
 
     genes_names = np.genfromtxt(config.ifname("x"), dtype='str', usecols = 0)[1:]
     config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
+    genes_names[:] = map(lambda s : s.strip('"'), genes_names)
 
     genes_dict = dict((v, i) for i, v in enumerate(genes_names))
 
     patients_names = np.genfromtxt(config.ifname("patients_id"), dtype='str', usecols = 0)[1:]
-
-    patients_names = [s.replace('"', '') for s in patients_names]
-
+    patients_names[:] = map(lambda s : s.strip('"'), patients_names)
     patients_dict = dict((v, i) for i, v in enumerate(patients_names))
 
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
@@ -52,6 +51,10 @@ def load_data_cancer():
     np.random.shuffle(ids)
     cnt = int(len(ids) * 0.1)
     mask[ids[:cnt]] = 1
+
+    config.params["control_mask"].value = ids[:cnt]
+    config.params["health_mask"].value = ids
+    config.params["cancer_mask"].value = np.flatnonzero(y == 1)
 
     print X.shape, config.params["num_genes"].value, mask.sum(), mask
     sys.stdout.flush()

@@ -1,5 +1,5 @@
-from slurm_info import info
-#from ws_info import info
+#from slurm_info import info
+from ws_info import info
 from configuration import configuration, param
 import collections
 import numpy as np
@@ -13,6 +13,10 @@ params = collections.OrderedDict([
     ("num_parts", param(30, name = 'num_parts')),
     ("num_workers", param(30, name = 'num_workers')),
     ("num_samples", param(489, name = 'num_samples')),
+    ("kde_mask", param('control_mask', name = 'kde_mask')),
+    ("health_mask", param([], name = 'health_mask')),
+    ("control_mask", param([], name = 'control_mask')),
+    ("cancer_mask", param([], name = 'cancer_mask')),
 ])
 
 files = {

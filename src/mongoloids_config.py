@@ -1,5 +1,5 @@
-from slurm_info import info
-#from ws_info import info
+#from slurm_info import info
+from ws_info import info
 from configuration import configuration, param
 import collections
 import numpy as np
@@ -7,7 +7,7 @@ from pathlib2 import Path
 
 params = collections.OrderedDict([
     ("num_genes", param(15024, name = 'num_genes')), # 15024, 20270
-    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
+    ("kde_mask", param('mothers_mask', name = 'kde_mask')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("thr_p", param(value_be = 0.1, value_en = 0.9, num_ticks = 9, name = 'threshold_p')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
