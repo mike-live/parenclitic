@@ -1,6 +1,6 @@
 #from slurm_info import info
-from ws_info import info
-from configuration import configuration, param
+from configurations.ws_info import info
+from infrastructure.configuration import configuration, param
 import collections
 import numpy as np
 from pathlib2 import Path
@@ -22,7 +22,6 @@ files = {
     "gene_chromosome": 'gene_chr.txt',
     "x": 'gene_mean_islands_shores.txt',
     "patients_info": "patients_info.txt",
-    "horvath_cpgs_beta": "horvath_cpgs_beta.txt",
     "name_genes": 'linreg_genes_mean_islands_shores',
     #"ranged_genes": 'linreg_genes_mean_islands_shores.txt',
     "g": 'graph',
