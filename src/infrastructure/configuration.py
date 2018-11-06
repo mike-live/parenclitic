@@ -86,6 +86,7 @@ class configuration:
                 self.project_path = parent / project_name
                 break
         self.upd_ticks()
+        self.data_name = data_name
         self.data_path = self.project_path / data_path / data_name
         self.name = config_name
         self.params_sets = params_sets
