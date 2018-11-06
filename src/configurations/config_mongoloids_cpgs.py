@@ -41,7 +41,7 @@ params_sets = {
     "graphs": set(['kde_mask', 'num_cpgs', 'id_part', 'num_parts']),
     "graph": set(['kde_mask', 'num_cpgs', 'thr_p', 'id_sample']),
     "degrees": set(['kde_mask', 'num_cpgs']),
-    "parenclitic": set(['kde_mask', 'num_cpgs']),
+    "parenclitic": set(['kde_mask', 'num_cpgs', 'thr_p']),
     "degrees_sample": set(['kde_mask', 'num_cpgs', 'thr_p', 'id_sample']),
     "parenclitic_sample": set(['kde_mask', 'num_cpgs', 'thr_p', 'id_sample']),
     "degrees_boxplots": set(['kde_mask', 'num_cpgs']),

@@ -13,8 +13,10 @@ import igraph
 import scipy.stats as stats
 import scipy.integrate as integrate
 import numpy as np
+import pandas as pd
 import timeit
 from sklearn.neighbors.kde import KernelDensity
+from numpy import linalg as LA
 
 feature_names = []
 
@@ -66,18 +68,23 @@ def robustness(g):
 
 
 def calculate_metrics(g, w, need_weights = False):
+    print 'Metrics'
+    sys.stdout.flush()
+
     if need_weights:
         weights = 'weight'
     else:
         weights = None
-    parenclitic = np.zeros(parenclitic_num_features(), dtype = np.float32)
 
+    parenclitic = pd.DataFrame()
+    
     start = timeit.default_timer()
 
     degrees = np.array(g.vs.degree())
-    parenclitic[0] = np.max (degrees)
-    parenclitic[1] = np.mean(degrees)
-    parenclitic[2] = np.std (degrees)
+    parenclitic['degrees'] = [degrees]
+    parenclitic['max_degrees'] = np.max (degrees)
+    parenclitic['mean_degrees'] = np.mean(degrees)
+    parenclitic['std_degrees'] = np.std (degrees)
     degrees = None
 
     stop = timeit.default_timer()
@@ -88,12 +95,12 @@ def calculate_metrics(g, w, need_weights = False):
 
     shortest_paths = np.array(g.shortest_paths(weights = weights))
     shortest_paths = shortest_paths[(shortest_paths > 0) & (shortest_paths != np.inf)]
-    efficency = 0
+    efficiency = 0
     if len(shortest_paths) > 0:
-        efficency = (1.0 / shortest_paths).sum() / (g.vcount() * (g.vcount() - 1))
+        efficiency = (1.0 / shortest_paths).sum() / (g.vcount() * (g.vcount() - 1))
     # In paper Latora V., Marchiori M.: Efficient behavior of small-world networks. Phys. Rev. Lett. 87 (Article No. 198701) (2001)
     # suggested to normalize by efficiency for threshold_p = 0 (cause graph has all edges when thr_p = 0)
-    parenclitic[3] = efficency
+    parenclitic['efficiency'] = efficiency
     shortest_paths = None
 
     stop = timeit.default_timer()
@@ -104,9 +111,10 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     betweenness = g.betweenness(weights = weights)
-    parenclitic[4] = np.max (betweenness)
-    parenclitic[5] = np.mean(betweenness)
-    parenclitic[6] = np.std (betweenness)
+    parenclitic['betweenness'] = [betweenness]
+    parenclitic['max_betweenness'] = np.max (betweenness)
+    parenclitic['mean_betweenness'] = np.mean(betweenness)
+    parenclitic['std_betweenness'] = np.std (betweenness)
     betweenness = None
 
     stop = timeit.default_timer()
@@ -117,9 +125,10 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     closeness = g.closeness(weights = weights)
-    parenclitic[7] = np.max (closeness)
-    parenclitic[8] = np.mean(closeness)
-    parenclitic[9] = np.std (closeness)
+    parenclitic['closeness'] = [closeness]
+    parenclitic['max_closeness'] = np.max (closeness)
+    parenclitic['mean_closeness'] = np.mean(closeness)
+    parenclitic['std_closeness'] = np.std (closeness)
     closeness = None
 
     stop = timeit.default_timer()
@@ -129,9 +138,10 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     pagerank = g.pagerank(weights = weights)
-    parenclitic[10] = np.max (pagerank)
-    parenclitic[11] = np.mean(pagerank)
-    parenclitic[12] = np.std (pagerank)
+    parenclitic['pagerank'] = [pagerank]
+    parenclitic['max_pagerank'] = np.max (pagerank)
+    parenclitic['mean_pagerank'] = np.mean(pagerank)
+    parenclitic['std_pagerank'] = np.std (pagerank)
     pagerank = None
 
     stop = timeit.default_timer()
@@ -143,77 +153,121 @@ def calculate_metrics(g, w, need_weights = False):
     # alpha centrality with alpha = 1
     
     eigenvector_centrality = g.eigenvector_centrality(weights = weights)
-    parenclitic[13] = np.mean(eigenvector_centrality)
+    parenclitic['eigenvector_centrality'] = [eigenvector_centrality]
+    parenclitic['mean_eigenvector_centrality'] = np.mean(eigenvector_centrality)
     eigenvector_centrality = None
-    
 
     stop = timeit.default_timer()
-    print 'Parenclitic 6', stop - start
+    print 'Parenclitic centrality', stop - start
     sys.stdout.flush()
         
     start = timeit.default_timer()
 
-    parenclitic[14] = g.ecount()
+    m = np.array(g.get_adjacency().data)
+    sys.stdout.flush()
 
-    if g.ecount() > 0:
-        weights = np.array(g.es["weight"])
-        parenclitic[15] = np.max (weights)
-        parenclitic[16] = np.mean(weights)
-        parenclitic[17] = np.std (weights)
-        weights = None
+    eigenvalues, eigenvectors = LA.eig(m)
+    print 'Eigenvectors', stop - start
+    sys.stdout.flush()
+
+    eigenvalues_intervals = np.diff(np.sort(eigenvalues)) 
+    print 'intervals', stop - start
+    sys.stdout.flush()
+
+    eigenvalues_intervals_normalized = eigenvalues_intervals / np.mean(eigenvalues_intervals)
+
+    print 'normalized', stop - start
+    sys.stdout.flush()
+    
+    parenclitic['eigenvalues'] = [eigenvalues]
+    parenclitic['eigenvalues_intervals'] = [eigenvalues_intervals]
+    parenclitic['eigenvalues_intervals_normalized'] = [eigenvalues_intervals_normalized]
+
+    stop = timeit.default_timer()
+    print 'Parenclitic: eigenvalues', stop - start
+    sys.stdout.flush()
+    
+    IPR = np.sum(np.power(eigenvectors, 4), axis=1) / np.power(np.sum(np.power(eigenvectors, 2), axis=1), 2)
+    parenclitic['IPR'] = [IPR]
+    parenclitic['max_IPR'] = np.max(IPR)
+    parenclitic['mean_IPR'] = np.mean(IPR)
 
     stop = timeit.default_timer()
     print 'Parenclitic 7', stop - start
     sys.stdout.flush()
-
+        
     start = timeit.default_timer()
-#    parenclitic[18] = g.community_edge_betweenness().optimal_count
+
+    parenclitic['num_edges'] = g.ecount()
+
+    if g.ecount() > 0:
+        weights = np.array(g.es["weight"])
+        parenclitic['weights'] = [weights]
+        parenclitic['max_weights'] = np.max (weights)
+        parenclitic['mean_weights'] = np.mean(weights)
+        parenclitic['std_weights'] = np.std (weights)
+        weights = None
+
     stop = timeit.default_timer()
     print 'Parenclitic 8', stop - start
     sys.stdout.flush()
-        
+
     start = timeit.default_timer()
-    parenclitic[19] = robustness(g)
+#    parenclitic['community_edge_betweenness_optimal'] = g.community_edge_betweenness().optimal_count
     stop = timeit.default_timer()
     print 'Parenclitic 9', stop - start
     sys.stdout.flush()
+        
+    start = timeit.default_timer()
+    parenclitic['robustness'] = robustness(g)
+    stop = timeit.default_timer()
+    print 'Parenclitic 10', stop - start
+    sys.stdout.flush()
 
-    assert(parenclitic.size == parenclitic_num_features())
     return parenclitic
 
 def parenclitic_feature_names():
-    feature_names = [''] * parenclitic_num_features()
-    feature_names[0] = 'Max degrees'
-    feature_names[1] = 'Mean degrees'
-    feature_names[2] = 'Std degrees'
+    feature_names['degrees'] = 'Degrees'
+    feature_names['max_degrees'] = 'Max degrees'
+    feature_names['mean_degrees'] = 'Mean degrees'
+    feature_names['std_degrees'] = 'Std degrees'
     
-    feature_names[3] = 'Efficency'
-    feature_names[4] = 'Max betweenness'
-    feature_names[5] = 'Mean betweenness'
-    feature_names[6] = 'Std betweenness'
+    feature_names['efficency'] = 'Efficency'
+    feature_names['betweenness'] = 'Betweenness'
+    feature_names['max_betweenness'] = 'Max betweenness'
+    feature_names['mean_betweenness'] = 'Mean betweenness'
+    feature_names['std_betweenness'] = 'Std betweenness'
     
-    feature_names[7] = 'Max closeness'
-    feature_names[8] = 'Mean closeness'
-    feature_names[9] = 'Std closeness'
+    feature_names['closeness'] = 'Closeness'
+    feature_names['max_closeness'] = 'Max closeness'
+    feature_names['mean_closeness'] = 'Mean closeness'
+    feature_names['std_closeness'] = 'Std closeness'
     
-    feature_names[10] = 'Max pagerank'
-    feature_names[11] = 'Mean pagerank'
-    feature_names[12] = 'Std pagerank'
+    feature_names['pagerank'] = 'Pagerank'
+    feature_names['max_pagerank'] = 'Max pagerank'
+    feature_names['mean_pagerank'] = 'Mean pagerank'
+    feature_names['std_pagerank'] = 'Std pagerank'
     
-    feature_names[13] = 'Mean eigenvector centrality'
-    feature_names[14] = 'Number of edges'
+    feature_names['eigenvalues'] = 'Eigenvalues'
+    feature_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'
+    feature_names['num_edges'] = 'Number of edges'
 
-    feature_names[15] = 'Max weights'
-    feature_names[16] = 'Mean weights'
-    feature_names[17] = 'Std weights'
+    feature_names['eigenvalues_intervals'] = 'Eigenvalues intervals'
+    feature_names['eigenvalues_intervals_normalized'] = 'Eigenvalues intervals normalized'
+
+    feature_names['IPR'] = 'IPR'
+    feature_names['max_IPR'] = 'Max IPR'
+    feature_names['mean_IPR'] = 'Mean IPR'
+
+    feature_names['weights'] = 'Weights'
+    feature_names['max_weights'] = 'Max weights'
+    feature_names['mean_weights'] = 'Mean weights'
+    feature_names['std_weights'] = 'Std weights'
     
-    feature_names[18] = 'Community edge betweenness: optimal count'
+    feature_names['community_edge_betweenness_optimal'] = 'Community edge betweenness: optimal count'
         
-    feature_names[19] = 'Robustness'
+    feature_names['robustness'] = 'Robustness'
     return feature_names    
-
-def parenclitic_num_features():
-    return 20
 
 
 def parenclitic_transform(x, kdes = None, p = None, I = None, G = None, threshold_p = 0.5, min_x = 0, max_x = 1, graph_path = '', id_patient = -1, genes_names = []):

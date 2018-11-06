@@ -4,11 +4,19 @@ import timeit
 import numpy as np
 from make_graphs_parts import *
 import sys
-from auxillary import *
+from infrastructure.auxillary import *
+from infrastructure.configuration import param
+import pandas as pd
 import time
 
-from ages_config import config
-from load_data_age import load_data_age
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
+#from configurations.config_down_GSE63347_cpg_hannum import config
+
+from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
+from configurations.config_down_GSE63347_cpg_horvath import config
+
+#from ages_config import config
+#from load_data_age import load_data_age
 
 #from load_data_mongoloids import load_data_mongoloids
 #from mongoloids_config import config
@@ -39,15 +47,16 @@ def traverse_graphs(config, X, G, calc_func, upd_func):
     sys.stdout.flush()
 
 def calc_new_feautures(x, g, i):
-    #disable_print()
+    disable_print()
     g = np.unpackbits(g, axis = 1)[:, :x.size]
-    res = (i, get_degrees(g), parenclitic_transform(x, G = g))
-    #enable_print()
+    res = (i, parenclitic_transform(x, G = g))
+    enable_print()
     return res
 
 def make_new_features(X):
-    degrees = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], X.shape[1]), dtype = np.int32)
-    parenclitic = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], parenclitic_num_features()), dtype = np.float32)
+    #degrees = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], X.shape[1]), dtype = np.int32)
+    #parenclitic = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], parenclitic_num_features()), dtype = np.float32)
+    parenclitic = [pd.DataFrame()] * config.params["thr_p"].num_ticks
     print 'Make new features'
     sys.stdout.flush()
     start = timeit.default_timer()
@@ -57,13 +66,12 @@ def make_new_features(X):
 
         #disable_print()
         G = read_graphs(config, X, id_thr)
-        G = extract_graphs(G, config.params["num_genes"].value, X.shape[0])
+        G = extract_graphs(G, config.params["num_features"].value, X.shape[0])
         print G.shape, G.dtype
         sys.stdout.flush()
 
         def upd_new_features(res, id_thr = id_thr):
-            degrees[id_thr, res[0]] = res[1]
-            parenclitic[id_thr, res[0]] = res[2]
+            parenclitic[id_thr] = parenclitic[id_thr].append(res[1])
     
         traverse_graphs(config, X, G, calc_new_feautures, upd_new_features)
         #enable_print()
@@ -74,27 +82,23 @@ def make_new_features(X):
     stop = timeit.default_timer()
     print 'New features were calculated in ', stop - start
     sys.stdout.flush()
-    return degrees, parenclitic
+    return parenclitic
 
 if __name__ == '__main__':
     global pool
     pool = Pool(config.params["num_workers"].value)
 
-    X, y, _, genes_names = load_data_age()
-    #X, y, _, genes_names = load_data_mongoloids()
+    X, y, _, features_names = load_data_down_GSE63347_cpg_horvath()
 
-    config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
+    config.params["num_features"] = param(features_names.size, name = 'num_features')
+
     config.params["thr_p"].whole_values = False
-    degrees, parenclitic = make_new_features(X)
+    parenclitic = make_new_features(X)
 
     for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
         config.params["thr_p"].set_tick(id_thr)
     
-        config.save_params(include_set = config.params_sets["degrees"])
+        config.save_params(include_set = config.params_sets["parenclitic"])
     
-        degrees_cur = degrees[id_thr, :, :]
-        print degrees_cur.dtype
-        np.savetxt(config.ofname(["degrees"], ext = ".txt", include_set = config.params_sets["degrees"]), degrees_cur, delimiter = '\t', fmt = '%6d')
-    
-        parenclitic_cur = parenclitic[id_thr, :, :]
-        np.savetxt(config.ofname(["parenclitic"], ext = ".txt", include_set = config.params_sets["parenclitic"]), parenclitic_cur, delimiter = '\t')
+        parenclitic_cur = parenclitic[id_thr]
+        parenclitic_cur.to_pickle(config.ofname(["parenclitic"], ext = ".pkl", include_set = config.params_sets["parenclitic"]))
