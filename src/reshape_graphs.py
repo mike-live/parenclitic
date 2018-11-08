@@ -19,8 +19,14 @@ import time
 #from load_data_down_GSE63347 import load_data_down_GSE63347
 #from down_GSE63347_config import config
 
-from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
-from configurations.config_down_GSE63347_cpg_hannum import config
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
+#from configurations.config_down_GSE63347_cpg_hannum import config
+
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
+#from configurations.config_down_GSE63347_cpg_horvath import config
+
+from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
+from configurations.config_age_GSE87571_cpg_horvath import config
 
 #from load_data_cancer import load_data_cancer
 #from cancer_config import config
@@ -46,7 +52,7 @@ def reshape_graphs(X):
 if __name__ == '__main__':
     #X, y, _, genes_names = load_data_age()
     #X, y, _, genes_names = load_data_cancer()
-    X, y, _, genes_names = load_data_down_GSE63347_cpg_hannum()
+    X, y, _, genes_names = load_data_age_GSE87571_cpg_horvath()
     
     config.params["thr_p"].whole_values = False
     config.params["id_sample"].manual_ticks = True 

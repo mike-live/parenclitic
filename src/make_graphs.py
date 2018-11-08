@@ -18,9 +18,11 @@ from infrastructure.configuration import param
 #from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
 #from configurations.config_down_GSE63347_cpg_hannum import config
 
-from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
-from configurations.config_down_GSE63347_cpg_horvath import config
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
+#from configurations.config_down_GSE63347_cpg_horvath import config
 
+from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
+from configurations.config_age_GSE87571_cpg_horvath import config
 
 #from load_data_cancer import load_data_cancer
 #from cancer_config import config
@@ -36,7 +38,7 @@ config.params["num_parts"] = param(config.info['run_num'], name = 'num_parts')
 config.upd_ticks()
 
 
-X, y, X_prob, _ = load_data_down_GSE63347_cpg_horvath()
+X, y, X_prob, _ = load_data_age_GSE87571_cpg_horvath()
 
 
 config.save_params(include_set = config.params_sets["graphs"])
