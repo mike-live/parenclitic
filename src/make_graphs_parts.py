@@ -28,10 +28,10 @@ def get_part(id_part, num_parts, num_features):
     sys.stdout.flush()
     return be_part, en_part
     
-def make_graphs_part(X_prob, X, threshold_p, id_part, num_parts, num_workers = 1):
+def make_graphs_part(X_prob, X, y, threshold_p, id_part, num_parts, num_workers = 1, algo = "svc"):
     start = timeit.default_timer()
     be_part, en_part = get_part(id_part, num_parts, X.shape[1])
-    G = parenclitic_graphs(X_prob, X, threshold_p, num_workers = num_workers, skip_values = lambda i, j: (i >= j) or (be_part > i * X.shape[1] + j or i * X.shape[1] + j > en_part))
+    G = parenclitic_graphs(X_prob, X, y, threshold_p, num_workers = num_workers, skip_values = lambda i, j: (i >= j) or (be_part > i * X.shape[1] + j or i * X.shape[1] + j > en_part), algo = algo)
     stop = timeit.default_timer()
     print 'Make graphs: ', stop - start 
     sys.stdout.flush()

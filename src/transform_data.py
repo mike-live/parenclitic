@@ -365,15 +365,28 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
             G[i] = np.ones((X_i.shape[0]), dtype=np.bool)
     return G
 
-def make_genes_edges(X_prob, X, threshold_p):
+def make_genes_edge_svc(X_i, X_j, y):
+    from sklearn import svm, datasets
+    clf = svm.SVC(kernel = 'linear', C = 1)
+    data = np.array([X_i, X_j]).T
+    clf.fit(data, y == 0)
+    G = clf.predict(data) == 1
+    score = clf.score(data, y == 0)
+    if score < 0.75:
+        G[:] = False
+    G = G.reshape((1, len(G)))
+    return G
+    
+def make_genes_edges(X_prob, X, y, threshold_p):
     G = np.zeros((X.shape[0], 1, k), dtype=np.bool)
     for j in range(k):
-        G[:, 0, j] = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
+        #G[:, 0, j] = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
+        G[:, 0, j] = make_genes_edge_svc(X[:, i], X[:, j], y)
     return G
 
 
-def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_values = lambda i, j: i >= j):
-    if not isinstance(threshold_p, collections.Iterable):
+def parenclitic_graphs(X_prob, X, y, threshold_p = 0.5, num_workers = 1, skip_values = lambda i, j: i >= j, algo = "svc"):
+    if not threshold_p is None and not isinstance(threshold_p, collections.Iterable):
         threshold_p = [threshold_p]
 
     k = X.shape[1]
@@ -388,7 +401,10 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
             if skip_values(i, j): continue
             num_pairs += 1
     num_bytes = len(np.packbits(np.zeros((X.shape[0], 1),dtype = np.bool)))
-    G = np.zeros((len(threshold_p), num_pairs, num_bytes), dtype = np.uint8)
+    if threshold_p is None:
+        G = np.zeros((num_pairs, num_bytes), dtype = np.uint8)
+    else:
+        G = np.zeros((len(threshold_p), num_pairs, num_bytes), dtype = np.uint8)
     print 'G size:', G.nbytes, G.shape
     
     need_parallel = num_workers > 1
@@ -409,8 +425,11 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
             def upd_graph(g, i = i, j = j, lid = lid):
                 global num_done, done_tasks, ready
                 gp = np.packbits(g, axis=1)
-                for id_thr, gl in enumerate(gp):
-                    G[id_thr][lid] = gl
+                if threshold_p is None:
+                    G[lid] = gp
+                else: 
+                    for id_thr, gl in enumerate(gp):
+                        G[id_thr][lid] = gl
                 done_tasks += 1
                 ready.release()
 
@@ -422,9 +441,16 @@ def parenclitic_graphs(X_prob, X, threshold_p = 0.5, num_workers = 1, skip_value
 
             if need_parallel:
                 ready.acquire()
-                pool.apply_async(make_genes_edge, args = (X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
+                if algo == "svc":
+                    sys.stdout.flush()
+                    pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y), callback = upd_graph)
+                else: 
+                    pool.apply_async(make_genes_edge, args = (X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
             else:
-                g = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
+                if algo == "svc":
+                    g = make_genes_edge_svc(X[:, i], X[:, j], y)
+                else:
+                    g = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
                 upd_graph(g)
 
             lid += 1
@@ -500,7 +526,7 @@ def get_degrees(G):
     degrees = np.array(g.vs.degree())
     return degrees
 
-def read_graphs(config, X, id_thr):
+def read_graphs(config, X, id_thr = None):
     num_bytes = len(np.packbits(np.zeros((X.shape[0], 1), dtype = np.bool)))
     G = np.zeros((X.shape[1] * (X.shape[1] - 1) / 2, num_bytes), dtype = np.uint8)
     print 'Read graph'
@@ -513,8 +539,11 @@ def read_graphs(config, X, id_thr):
         stop = timeit.default_timer()
         print 'Part', i, 'of graphs was read in', stop - start
         sys.stdout.flush()
-        #if G is None:
-        cur = data['G'][id_thr]
+        if id_thr is None:
+            cur = data['G']
+            print cur.shape
+        else:
+            cur = data['G'][id_thr]
         G[lid:(lid + cur.shape[0]), :] = cur
         lid += cur.shape[0]
         #else:
@@ -523,5 +552,6 @@ def read_graphs(config, X, id_thr):
         print 'Part', i, 'of graphs was added in', stop - start
         sys.stdout.flush()
         data.close()
+    print lid, G.shape[0]
     assert (lid == G.shape[0])
     return G

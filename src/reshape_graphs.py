@@ -31,20 +31,24 @@ from configurations.config_age_GSE87571_cpg_horvath import config
 #from load_data_cancer import load_data_cancer
 #from cancer_config import config
 
+def reshape_graph(X, id_thr = None):
+    G = read_graphs(config, X, id_thr)
+    G = extract_graphs(G, X.shape[1], X.shape[0])
+    for i, x in enumerate(X):
+        config.params["id_sample"].set_tick(i)
+        np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]), G = G[i, :, :])
+
+
 def reshape_graphs(X):
     print 'Reshape graph'
     sys.stdout.flush()
     start = timeit.default_timer()
-    for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
-        config.params["thr_p"].set_tick(id_thr)
-        start_thr = timeit.default_timer()
-
-        G = read_graphs(config, X, id_thr)
-        G = extract_graphs(G, X.shape[1], X.shape[0])
-        for i, x in enumerate(X):
-            config.params["id_sample"].set_tick(i)
-            np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]), G = G[i, :, :])
-
+    if "thr_p" in config.params:
+        for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
+            config.params["thr_p"].set_tick(id_thr)
+            reshape_graph(X, id_thr)
+    else:
+        reshape_graph(X)
     stop = timeit.default_timer()
     print 'Graph reshaped in ', stop - start
     sys.stdout.flush()
@@ -54,7 +58,8 @@ if __name__ == '__main__':
     #X, y, _, genes_names = load_data_cancer()
     X, y, _, genes_names = load_data_age_GSE87571_cpg_horvath()
     
-    config.params["thr_p"].whole_values = False
+    if "thr_p" in config.params:
+        config.params["thr_p"].whole_values = False
     config.params["id_sample"].manual_ticks = True 
 
     reshape_graphs(X)

@@ -64,7 +64,7 @@ def load_data_age_GSE87571_cpg_horvath():
 
     #patients_info = np.genfromtxt(config.ifname("patients_info"), dtype='str', usecols = 1)
     patients_info = pd.read_csv(config.ifname("patients_info"), sep = ' ')
-    y = (patients_info['age'] < config.params["delimiter_age"].value).astype(np.uint8)
+    y = (np.array(patients_info['age'] < config.params["delimiter_age"].value)).astype(np.uint8)
 
     config.params["young_mask"].value = np.flatnonzero(y == 1)
     config.params["old_mask"].value = np.flatnonzero(y == 0)

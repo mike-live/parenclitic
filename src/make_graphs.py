@@ -42,6 +42,7 @@ X, y, X_prob, _ = load_data_age_GSE87571_cpg_horvath()
 
 
 config.save_params(include_set = config.params_sets["graphs"])
-G = make_graphs_part(X_prob, X, config.params["thr_p"].get_values(), config.params["id_part"].value, config.params["num_parts"].value, num_workers = config.params["num_workers"].value)
-np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]), G = G)
+# config.params["thr_p"].get_values()
 
+G = make_graphs_part(X_prob, X, y, None, config.params["id_part"].value, config.params["num_parts"].value, num_workers = config.params["num_workers"].value, algo = config.params["algorithm"].value)
+np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]), G = G)

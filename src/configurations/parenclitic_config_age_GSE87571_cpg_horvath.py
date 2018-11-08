@@ -44,17 +44,17 @@ files = {
 
 params_sets = {
     "graphs": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_part', 'num_parts']),
-    "graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
+    "graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_p', 'id_sample']),
     "degrees": set(['input', 'kde_mask', 'algorithm', 'num_cpgs']),
-    "parenclitic": set(['input', 'kde_mask', 'num_cpgs', 'algorithm']),
-    "degrees_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
-    "parenclitic_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
+    "parenclitic": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_p']),
+    "degrees_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_p', 'id_sample']),
+    "parenclitic_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_p', 'id_sample']),
     "degrees_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm']),
     "parenclitic_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm']),
     "diff_graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm']),
     "pair_genes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
     "kdes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
-    "parenclitic_boxplot": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'id_parenclitic']),
+    "parenclitic_boxplot": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_p', 'id_parenclitic']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE87571', project_name = 'Gerontology', config_name = 'age', params_sets = params_sets)

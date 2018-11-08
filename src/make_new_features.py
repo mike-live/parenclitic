@@ -56,31 +56,40 @@ def calc_new_feautures(x, g, i):
     enable_print()
     return res
 
+def make_new_features_graph(X, id_thr = None):
+    #disable_print()
+    parenclitic = [pd.DataFrame()]
+    G = read_graphs(config, X, id_thr)
+    G = extract_graphs(G, config.params["num_features"].value, X.shape[0])
+    print G.shape, G.dtype
+    sys.stdout.flush()
+
+    def upd_new_features(res, id_thr = id_thr):
+        parenclitic[0] = parenclitic[0].append(res[1], ignore_index=True)
+
+    traverse_graphs(config, X, G, calc_new_feautures, upd_new_features)
+    #enable_print()
+    return parenclitic[0]
+    
+    
 def make_new_features(X):
     #degrees = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], X.shape[1]), dtype = np.int32)
     #parenclitic = np.zeros((config.params["thr_p"].num_ticks, X.shape[0], parenclitic_num_features()), dtype = np.float32)
-    parenclitic = [pd.DataFrame()] * config.params["thr_p"].num_ticks
     print 'Make new features'
     sys.stdout.flush()
     start = timeit.default_timer()
-    for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
-        config.params["thr_p"].set_tick(id_thr)
-        start_thr = timeit.default_timer()
 
-        #disable_print()
-        G = read_graphs(config, X, id_thr)
-        G = extract_graphs(G, config.params["num_features"].value, X.shape[0])
-        print G.shape, G.dtype
-        sys.stdout.flush()
-
-        def upd_new_features(res, id_thr = id_thr):
-            parenclitic[id_thr] = parenclitic[id_thr].append(res[1], ignore_index=True)
-    
-        traverse_graphs(config, X, G, calc_new_feautures, upd_new_features)
-        #enable_print()
-        stop_thr = timeit.default_timer()
-        print 'Threshold:', id_thr, thr, stop_thr - start_thr
-        sys.stdout.flush()
+    if "thr_p" in config.params:
+        parenclitic = [] * config.params["thr_p"].num_ticks
+        for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
+            config.params["thr_p"].set_tick(id_thr)
+            start_thr = timeit.default_timer()
+            parenclitic[id_thr] = make_new_features_graph(X, id_thr)
+            print 'Threshold:', id_thr, thr, stop_thr - start_thr
+            stop_thr = timeit.default_timer()
+            sys.stdout.flush()
+    else:
+        parenclitic = make_new_features_graph(X)
 
     stop = timeit.default_timer()
     print 'New features were calculated in ', stop - start
@@ -95,13 +104,15 @@ if __name__ == '__main__':
 
     config.params["num_features"] = param(features_names.size, name = 'num_features')
 
-    config.params["thr_p"].whole_values = False
+    if "thr_p" in config.params:
+        config.params["thr_p"].whole_values = False
     parenclitic = make_new_features(X)
 
-    for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
-        config.params["thr_p"].set_tick(id_thr)
+    if "thr_p" in config.params:
+        for id_thr, thr in enumerate(config.params["thr_p"].get_values()):
+            config.params["thr_p"].set_tick(id_thr)
+            config.save_params(include_set = config.params_sets["parenclitic"])
+            parenclitic[id_thr].to_pickle(config.ofname(["parenclitic"], ext = ".pkl", include_set = config.params_sets["parenclitic"]))
+    else:
+        parenclitic.to_pickle(config.ofname(["parenclitic"], ext = ".pkl", include_set = config.params_sets["parenclitic"]))
     
-        config.save_params(include_set = config.params_sets["parenclitic"])
-    
-        parenclitic_cur = parenclitic[id_thr]
-        parenclitic_cur.to_pickle(config.ofname(["parenclitic"], ext = ".pkl", include_set = config.params_sets["parenclitic"]))
