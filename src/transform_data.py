@@ -111,7 +111,7 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     betweenness = g.betweenness(weights = weights)
-    parenclitic['betweenness'] = [betweenness]
+    parenclitic['betweenness'] = [np.array(betweenness)]
     parenclitic['max_betweenness'] = np.max (betweenness)
     parenclitic['mean_betweenness'] = np.mean(betweenness)
     parenclitic['std_betweenness'] = np.std (betweenness)
@@ -125,7 +125,7 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     closeness = g.closeness(weights = weights)
-    parenclitic['closeness'] = [closeness]
+    parenclitic['closeness'] = [np.array(closeness)]
     parenclitic['max_closeness'] = np.max (closeness)
     parenclitic['mean_closeness'] = np.mean(closeness)
     parenclitic['std_closeness'] = np.std (closeness)
@@ -138,7 +138,7 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     pagerank = g.pagerank(weights = weights)
-    parenclitic['pagerank'] = [pagerank]
+    parenclitic['pagerank'] = [np.array(pagerank)]
     parenclitic['max_pagerank'] = np.max (pagerank)
     parenclitic['mean_pagerank'] = np.mean(pagerank)
     parenclitic['std_pagerank'] = np.std (pagerank)
@@ -153,7 +153,7 @@ def calculate_metrics(g, w, need_weights = False):
     # alpha centrality with alpha = 1
     
     eigenvector_centrality = g.eigenvector_centrality(weights = weights)
-    parenclitic['eigenvector_centrality'] = [eigenvector_centrality]
+    parenclitic['eigenvector_centrality'] = [np.array(eigenvector_centrality)]
     parenclitic['mean_eigenvector_centrality'] = np.mean(eigenvector_centrality)
     eigenvector_centrality = None
 
@@ -162,11 +162,15 @@ def calculate_metrics(g, w, need_weights = False):
     sys.stdout.flush()
         
     start = timeit.default_timer()
-
-    m = np.array(g.get_adjacency().data)
+    
+    largest = g.clusters().giant()
+    m = np.array(largest.get_adjacency().data)
     sys.stdout.flush()
 
     eigenvalues, eigenvectors = LA.eig(m)
+    #Suppose symmetric matrix
+    eigenvalues = np.real(eigenvalues)
+    eigenvectors = np.real(eigenvectors)
     print 'Eigenvectors', stop - start
     sys.stdout.flush()
 
@@ -179,16 +183,17 @@ def calculate_metrics(g, w, need_weights = False):
     print 'normalized', stop - start
     sys.stdout.flush()
     
-    parenclitic['eigenvalues'] = [eigenvalues]
-    parenclitic['eigenvalues_intervals'] = [eigenvalues_intervals]
-    parenclitic['eigenvalues_intervals_normalized'] = [eigenvalues_intervals_normalized]
+    
+    parenclitic['eigenvalues'] = [np.array(eigenvalues)]
+    parenclitic['eigenvalues_intervals'] = [np.array(eigenvalues_intervals)]
+    parenclitic['eigenvalues_intervals_normalized'] = [np.array(eigenvalues_intervals_normalized)]
 
     stop = timeit.default_timer()
     print 'Parenclitic: eigenvalues', stop - start
     sys.stdout.flush()
     
     IPR = np.sum(np.power(eigenvectors, 4), axis=1) / np.power(np.sum(np.power(eigenvectors, 2), axis=1), 2)
-    parenclitic['IPR'] = [IPR]
+    parenclitic['IPR'] = [np.array(IPR)]
     parenclitic['max_IPR'] = np.max(IPR)
     parenclitic['mean_IPR'] = np.mean(IPR)
 
@@ -202,7 +207,7 @@ def calculate_metrics(g, w, need_weights = False):
 
     if g.ecount() > 0:
         weights = np.array(g.es["weight"])
-        parenclitic['weights'] = [weights]
+        parenclitic['weights'] = [np.array(weights)]
         parenclitic['max_weights'] = np.max (weights)
         parenclitic['mean_weights'] = np.mean(weights)
         parenclitic['std_weights'] = np.std (weights)

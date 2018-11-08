@@ -12,8 +12,11 @@ import time
 #from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
 #from configurations.config_down_GSE63347_cpg_hannum import config
 
-from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
-from configurations.config_down_GSE63347_cpg_horvath import config
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
+#from configurations.config_down_GSE63347_cpg_horvath import config
+
+from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
+from configurations.config_age_GSE87571_cpg_horvath import config
 
 #from ages_config import config
 #from load_data_age import load_data_age
@@ -71,7 +74,7 @@ def make_new_features(X):
         sys.stdout.flush()
 
         def upd_new_features(res, id_thr = id_thr):
-            parenclitic[id_thr] = parenclitic[id_thr].append(res[1])
+            parenclitic[id_thr] = parenclitic[id_thr].append(res[1], ignore_index=True)
     
         traverse_graphs(config, X, G, calc_new_feautures, upd_new_features)
         #enable_print()
@@ -88,7 +91,7 @@ if __name__ == '__main__':
     global pool
     pool = Pool(config.params["num_workers"].value)
 
-    X, y, _, features_names = load_data_down_GSE63347_cpg_horvath()
+    X, y, _, features_names = load_data_age_GSE87571_cpg_horvath()
 
     config.params["num_features"] = param(features_names.size, name = 'num_features')
 
