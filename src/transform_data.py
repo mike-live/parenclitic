@@ -227,12 +227,13 @@ def calculate_metrics(g, w, need_weights = False):
     return parenclitic
 
 def parenclitic_feature_names():
+    feature_names = {}
     feature_names['degrees'] = 'Degrees'
     feature_names['max_degrees'] = 'Max degrees'
     feature_names['mean_degrees'] = 'Mean degrees'
     feature_names['std_degrees'] = 'Std degrees'
     
-    feature_names['efficency'] = 'Efficency'
+    feature_names['efficiency'] = 'Efficiency'
     feature_names['betweenness'] = 'Betweenness'
     feature_names['max_betweenness'] = 'Max betweenness'
     feature_names['mean_betweenness'] = 'Mean betweenness'
