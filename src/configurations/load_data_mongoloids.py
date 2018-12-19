@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 import sys
 
 def load_data_mongoloids():
-    from mongoloids_config import config
+    from configurations.config_mongoloids import config
     start = timeit.default_timer()
     X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter=' ')[:, 1:]
 
