@@ -10,7 +10,7 @@ params = collections.OrderedDict([
     ("kde_mask", param('normal_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
-    ("thr_p", param(value_be = 0.1, value_en = 0.9, num_ticks = 9, name = 'threshold_p')),
+#    ("thr_p", param(value_be = 0.1, value_en = 0.9, num_ticks = 9, name = 'threshold_p')),
     ("id_sample", param(value_be = 0, value_en = 70, num_ticks = 71, name = 'id_sample')),
     ("num_parts", param(30, name = 'num_parts')),
     ("num_workers", param(30, name = 'num_workers')),
@@ -42,17 +42,17 @@ files = {
 
 params_sets = {
     "graphs": set(['kde_mask', 'num_genes', 'algorithm', 'id_part', 'num_parts']),
-    "graph": set(['kde_mask', 'num_genes', 'algorithm', 'thr_p', 'id_sample']),
+    "graph": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
     "degrees": set(['kde_mask', 'num_genes', 'algorithm']),
-    "parenclitic": set(['kde_mask', 'num_genes', 'algorithm', 'thr_p']),
-    "degrees_sample": set(['kde_mask', 'num_genes', 'algorithm', 'thr_p', 'id_sample']),
-    "parenclitic_sample": set(['kde_mask', 'num_genes', 'algorithm', 'thr_p', 'id_sample']),
+    "parenclitic": set(['kde_mask', 'num_genes', 'algorithm']),
+    "degrees_sample": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
+    "parenclitic_sample": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
     "degrees_boxplots": set(['kde_mask', 'num_genes', 'algorithm']),
     "parenclitic_boxplots": set(['kde_mask', 'num_genes', 'algorithm']),
     "diff_graph": set(['kde_mask', 'num_genes', 'algorithm']),
     "pair_genes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
     "kdes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
-    "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'thr_p', 'id_parenclitic']),
+    "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'id_parenclitic']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE63347', project_name = 'Gerontology', config_name = 'down_syndrome', params_sets = params_sets)
