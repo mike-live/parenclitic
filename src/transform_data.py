@@ -67,7 +67,7 @@ def robustness(g):
     return cnt
 
 
-def calculate_metrics(g, w, need_weights = False):
+def calculate_metrics(g, w, need_weights = False, get_big = True):
     print 'Metrics'
     sys.stdout.flush()
 
@@ -76,12 +76,12 @@ def calculate_metrics(g, w, need_weights = False):
     else:
         weights = None
 
-    parenclitic = pd.DataFrame()
-    
+    parenclitic = pd.DataFrame(index=[0])
     start = timeit.default_timer()
 
     degrees = np.array(g.vs.degree())
-    parenclitic['degrees'] = [degrees]
+    if get_big: 
+        parenclitic['degrees'] = [degrees]
     parenclitic['max_degrees'] = np.max (degrees)
     parenclitic['mean_degrees'] = np.mean(degrees)
     parenclitic['std_degrees'] = np.std (degrees)
@@ -107,11 +107,11 @@ def calculate_metrics(g, w, need_weights = False):
     print 'Parenclitic 2', stop - start
     sys.stdout.flush()
         
-    
     start = timeit.default_timer()
 
     betweenness = g.betweenness(weights = weights)
-    parenclitic['betweenness'] = [np.array(betweenness)]
+    if get_big: 
+        parenclitic['betweenness'] = [np.array(betweenness)]
     parenclitic['max_betweenness'] = np.max (betweenness)
     parenclitic['mean_betweenness'] = np.mean(betweenness)
     parenclitic['std_betweenness'] = np.std (betweenness)
@@ -125,7 +125,8 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     closeness = g.closeness(weights = weights)
-    parenclitic['closeness'] = [np.array(closeness)]
+    if get_big: 
+        parenclitic['closeness'] = [np.array(closeness)]
     parenclitic['max_closeness'] = np.max (closeness)
     parenclitic['mean_closeness'] = np.mean(closeness)
     parenclitic['std_closeness'] = np.std (closeness)
@@ -138,7 +139,8 @@ def calculate_metrics(g, w, need_weights = False):
     start = timeit.default_timer()
 
     pagerank = g.pagerank(weights = weights)
-    parenclitic['pagerank'] = [np.array(pagerank)]
+    if get_big: 
+        parenclitic['pagerank'] = [np.array(pagerank)]
     parenclitic['max_pagerank'] = np.max (pagerank)
     parenclitic['mean_pagerank'] = np.mean(pagerank)
     parenclitic['std_pagerank'] = np.std (pagerank)
@@ -153,7 +155,8 @@ def calculate_metrics(g, w, need_weights = False):
     # alpha centrality with alpha = 1
     
     eigenvector_centrality = g.eigenvector_centrality(weights = weights)
-    parenclitic['eigenvector_centrality'] = [np.array(eigenvector_centrality)]
+    if get_big: 
+        parenclitic['eigenvector_centrality'] = [np.array(eigenvector_centrality)]
     parenclitic['mean_eigenvector_centrality'] = np.mean(eigenvector_centrality)
     eigenvector_centrality = None
 
@@ -183,31 +186,38 @@ def calculate_metrics(g, w, need_weights = False):
     print 'normalized', stop - start
     sys.stdout.flush()
     
-    
-    parenclitic['eigenvalues'] = [np.array(eigenvalues)]
-    parenclitic['eigenvalues_intervals'] = [np.array(eigenvalues_intervals)]
-    parenclitic['eigenvalues_intervals_normalized'] = [np.array(eigenvalues_intervals_normalized)]
+    if get_big: 
+        parenclitic['eigenvalues'] = [np.array(eigenvalues)]
+        parenclitic['eigenvalues_intervals'] = [np.array(eigenvalues_intervals)]
+        parenclitic['eigenvalues_intervals_normalized'] = [np.array(eigenvalues_intervals_normalized)]
 
     stop = timeit.default_timer()
     print 'Parenclitic: eigenvalues', stop - start
     sys.stdout.flush()
     
-    IPR = np.sum(np.power(eigenvectors, 4), axis=1) / np.power(np.sum(np.power(eigenvectors, 2), axis=1), 2)
-    parenclitic['IPR'] = [np.array(IPR)]
+    IPR = np.sum(np.power(eigenvectors, 4), axis=0) / np.power(np.sum(np.power(eigenvectors, 2), axis=0), 2)
+    if get_big: 
+        parenclitic['IPR'] = [np.array(IPR)]
     parenclitic['max_IPR'] = np.max(IPR)
     parenclitic['mean_IPR'] = np.mean(IPR)
 
     stop = timeit.default_timer()
     print 'Parenclitic 7', stop - start
     sys.stdout.flush()
-        
-    start = timeit.default_timer()
 
+    eigenvectors = None
+    eigenvalues = None
+    IPR = None
+    eigenvalues_intervals = None
+    eigenvalues_intervals_normalized = None
+    
+    start = timeit.default_timer()
     parenclitic['num_edges'] = g.ecount()
 
     if g.ecount() > 0:
         weights = np.array(g.es["weight"])
-        parenclitic['weights'] = [np.array(weights)]
+        if get_big: 
+            parenclitic['weights'] = [np.array(weights)]
         parenclitic['max_weights'] = np.max (weights)
         parenclitic['mean_weights'] = np.mean(weights)
         parenclitic['std_weights'] = np.std (weights)
@@ -307,6 +317,8 @@ def parenclitic_transform(x, kdes = None, p = None, I = None, G = None, threshol
     '''
 
     parenclitic = calculate_metrics(g, w)
+    g = None
+    w = None
     sys.stdout.flush()
     return parenclitic
 

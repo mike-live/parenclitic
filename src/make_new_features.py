@@ -21,8 +21,8 @@ from configurations.config_age_GSE87571_cpg_horvath import config
 #from ages_config import config
 #from load_data_age import load_data_age
 
-#from load_data_mongoloids import load_data_mongoloids
-#from mongoloids_config import config
+#from configurations.load_data_mongoloids import load_data_mongoloids
+#from configurations.config_mongoloids import config
 
 def traverse_graphs(config, X, G, calc_func, upd_func):
     print 'Traverse graphs started'
@@ -52,8 +52,9 @@ def traverse_graphs(config, X, G, calc_func, upd_func):
 def calc_new_feautures(x, g, i):
     disable_print()
     g = np.unpackbits(g, axis = 1)[:, :x.size]
-    res = (i, parenclitic_transform(x, G = g))
+    res = parenclitic_transform(x, G = g)
     enable_print()
+    res['id_sample'] = i
     return res
 
 def make_new_features_graph(X, id_thr = None):
@@ -65,10 +66,12 @@ def make_new_features_graph(X, id_thr = None):
     sys.stdout.flush()
 
     def upd_new_features(res, id_thr = id_thr):
-        parenclitic[0] = parenclitic[0].append(res[1], ignore_index=True)
+        parenclitic[0] = parenclitic[0].append(res, ignore_index=True)
 
     traverse_graphs(config, X, G, calc_new_feautures, upd_new_features)
     #enable_print()
+    parenclitic[0].set_index('id_sample', inplace=True)
+    parenclitic[0].sort_index(inplace=True)
     return parenclitic[0]
     
     

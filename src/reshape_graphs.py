@@ -10,8 +10,8 @@ import time
 #from ages_config import config
 #from load_data_age import load_data_age
 
-#from load_data_mongoloids import load_data_mongoloids
-#from mongoloids_config import config
+#from configurations.load_data_mongoloids import load_data_mongoloids
+#from configurations.config_mongoloids import config
 
 #from load_data_mongoloids import load_data_mongoloids_hannum_cpgs
 #from mongoloids_cpg_hannum_config import config
@@ -25,11 +25,14 @@ import time
 #from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_horvath
 #from configurations.config_down_GSE63347_cpg_horvath import config
 
-from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
-from configurations.config_age_GSE87571_cpg_horvath import config
+#from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
+#from configurations.config_age_GSE87571_cpg_horvath import config
 
 #from load_data_cancer import load_data_cancer
 #from cancer_config import config
+
+from configurations.load_data_down_GSE63347 import load_data_down_GSE63347
+from configurations.config_down_GSE63347 import config
 
 def reshape_graph(X, id_thr = None):
     G = read_graphs(config, X, id_thr)
@@ -56,7 +59,7 @@ def reshape_graphs(X):
 if __name__ == '__main__':
     #X, y, _, genes_names = load_data_age()
     #X, y, _, genes_names = load_data_cancer()
-    X, y, _, genes_names = load_data_age_GSE87571_cpg_horvath()
+    X, y, _, genes_names = load_data_down_GSE63347()
     
     if "thr_p" in config.params:
         config.params["thr_p"].whole_values = False
