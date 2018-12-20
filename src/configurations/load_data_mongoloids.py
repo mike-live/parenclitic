@@ -78,7 +78,7 @@ def load_data_mongoloids_cpgs():
     return X, y, X[mask, :], genes_names, cpgs_names
 
 def load_data_mongoloids_horvath_cpgs():
-    from mongoloids_cpg_horvath_config import config
+    from config_mongoloids_cpg_horvath import config
     start = timeit.default_timer()
     X = np.genfromtxt(config.ifname("horvath_cpgs_beta"), dtype='float32', delimiter=' ')[:, 1:]
 

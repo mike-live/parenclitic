@@ -4,7 +4,7 @@ import os
 
 ws_info = {
  "work_dir": os.getcwd(), 
- "run_id": 1,
+ "run_id": 0,
  "run_num": 2
 }
 

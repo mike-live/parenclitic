@@ -6,7 +6,7 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_genes", param(15022, name = 'num_genes')), # 15024, 20270
+    ("num_genes", param(15022, name = 'num_genes')), # 15022
     ("kde_mask", param('normal_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
