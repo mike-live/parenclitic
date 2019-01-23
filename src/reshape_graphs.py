@@ -16,8 +16,8 @@ import time
 #from load_data_mongoloids import load_data_mongoloids_hannum_cpgs
 #from mongoloids_cpg_hannum_config import config
 
-#from load_data_down_GSE63347 import load_data_down_GSE63347
-#from down_GSE63347_config import config
+from load_data_down_GSE63347 import load_data_down_GSE63347
+from down_GSE63347_config import config
 
 #from configurations.load_data_down_GSE63347 import load_data_down_GSE63347_cpg_hannum
 #from configurations.config_down_GSE63347_cpg_hannum import config
@@ -31,16 +31,18 @@ import time
 #from load_data_cancer import load_data_cancer
 #from cancer_config import config
 
-from configurations.load_data_down_GSE63347 import load_data_down_GSE63347
-from configurations.config_down_GSE63347 import config
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347
+#from configurations.config_down_GSE63347 import config
+
+from configurations.load_data_mongoloids import load_data_mongoloids_horvath_cpgs
+from configurations.config_mongoloids_cpg_horvath import config
 
 def reshape_graph(X, id_thr = None):
-    G = read_graphs(config, X, id_thr)
+    G, D, IDS = read_graphs(config, X, id_thr)
     G = extract_graphs(G, X.shape[1], X.shape[0])
     for i, x in enumerate(X):
         config.params["id_sample"].set_tick(i)
-        np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]), G = G[i, :, :])
-
+        np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]), G = G[i, :, :], D = D[i, :], IDS = IDS)
 
 def reshape_graphs(X):
     print 'Reshape graph'
