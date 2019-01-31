@@ -3,8 +3,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import sys
 
-def load_data_down_GSE63347():
-    from configurations.config_down_GSE63347 import config
+def load_data_down_GSE74486():
+    from configurations.config_down_GSE74486 import config
     start = timeit.default_timer()
     X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter=' ')[:, 1:]
 
@@ -31,8 +31,15 @@ def load_data_down_GSE63347():
 
     y = np.zeros((X.shape[0], 1), dtype = 'uint8')
 
-    patients_info = np.genfromtxt(config.ifname("patients_info"), dtype='str', usecols = (1))
-    y = (patients_info == "N").astype(np.uint8)
+    import pandas as pd
+    patients_info = pd.read_csv(config.ifname("patients_info"), delimiter=';')
+    #patients_info = np.genfromtxt(config.ifname("patients_info"), dtype='str', usecols = 1, skip_header = 1, delimiter=';')
+    print patients_info["Age"]
+    print patients_info["Tissue"]
+    good_mask = (patients_info["Tissue"] == "Brain") & (np.isnan(patients_info["Age"]))
+    y[:] = 2
+    y[(patients_info["disease"] == "Normal") & good_mask] = 1
+    y[(patients_info["disease"] == "DS")     & good_mask] = 0
 
     config.params["normal_mask"].value = np.flatnonzero(y == 1)
     config.params["down_mask"].value = np.flatnonzero(y == 0)
@@ -40,8 +47,9 @@ def load_data_down_GSE63347():
     config.params["kde_mask"].value = "normal_mask"
 
     print X.shape, config.params["num_genes"].value
+    print y
     sys.stdout.flush()
-   
+
     mask = (y == 1)
     return X, y, X[mask, :], genes_names
 
