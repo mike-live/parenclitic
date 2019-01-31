@@ -379,9 +379,11 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
 
 def make_genes_edge_svc(X_i, X_j, y):
     from sklearn import svm, datasets
+    from scipy import stats
     #clf = svm.SVC(kernel = 'linear', C = 1, class_weight = "balanced")
     clf = svm.LinearSVC(C = 1, class_weight = "balanced")
-    data = np.array([X_i, X_j]).T
+    sys.stdout.flush()
+    data = stats.zscore(np.array([X_i, X_j]).T)
     clf.fit(data, y == 0)
     G = clf.predict(data) == 1
     score = clf.score(data, y != 1)
@@ -390,7 +392,7 @@ def make_genes_edge_svc(X_i, X_j, y):
         G[:] = False
     G = G.reshape((1, len(G)))
     D = clf.decision_function(data)
-    return G, D
+    return [G, D]
     
 def make_genes_edges(X_prob, X, y, threshold_p):
     G = np.zeros((X.shape[0], 1, k), dtype=np.bool)
@@ -399,8 +401,7 @@ def make_genes_edges(X_prob, X, y, threshold_p):
         G[:, 0, j] = make_genes_edge_svc(X[:, i], X[:, j], y)
     return G
 
-
-def parenclitic_graphs(X_prob, X, y, threshold_p = 0.5, num_workers = 1, skip_values = lambda i, j: i >= j, algo = "svc"):
+def parenclitic_graphs(X_prob, X, y, get_ids, threshold_p = 0.5, num_workers = 1, algo = "svc"): # skip_values = lambda i, j: i >= j
     if not threshold_p is None and not isinstance(threshold_p, collections.Iterable):
         threshold_p = [threshold_p]
 
@@ -411,10 +412,15 @@ def parenclitic_graphs(X_prob, X, y, threshold_p = 0.5, num_workers = 1, skip_va
     global num_done, num_pairs
     num_pairs = 0
     num_done = 0
+    for i, j in get_ids():
+        num_pairs += 1
+        
+    '''
     for i in range(k):
         for j in range(k):
             if skip_values(i, j): continue
             num_pairs += 1
+    '''
     num_bytes = len(np.packbits(np.zeros((X.shape[0], 1),dtype = np.bool)))
     D = []
     IDS = []
@@ -435,45 +441,51 @@ def parenclitic_graphs(X_prob, X, y, threshold_p = 0.5, num_workers = 1, skip_va
     start = timeit.default_timer()
     each_progress = int(np.sqrt(num_pairs + 0.5))
     lid = 0
+    '''
     for i in range(k):
         for j in range(k):
             if skip_values(i, j): continue
-
-            def upd_graph(g, d, i = i, j = j, lid = lid):
-                global num_done, done_tasks, ready
-                gp = np.packbits(g, axis=1)
-                if threshold_p is None:
-                    G[lid] = gp
-                    if g.any():
-                        D.append(d)
-                        IDS.append([i, j])
-                else: 
-                    for id_thr, gl in enumerate(gp):
-                        G[id_thr][lid] = gl
+    '''
+    for i, j in get_ids():
+        def upd_graph(ls, i = i, j = j, lid = lid):
+            global num_done, done_tasks, ready
+            g = ls[0]
+            d = ls[1]
+            gp = np.packbits(g, axis=1)
+            if threshold_p is None:
+                G[lid] = gp
+                if g.any():
+                    D.append(d)
+                    IDS.append([i, j])
+            else: 
+                for id_thr, gl in enumerate(gp):
+                    G[id_thr][lid] = gl
+        
+            if need_parallel:
                 done_tasks += 1
                 ready.release()
 
-                num_done += 1
-                if num_done % each_progress == 0 or num_done == num_pairs:
-                    stop = timeit.default_timer()
-                    print 'Graph for', num_done, 'pairs calculated in', stop - start
-                    sys.stdout.flush()
+            num_done += 1
+            if num_done % each_progress == 0 or num_done == num_pairs:
+                stop = timeit.default_timer()
+                print 'Graph for', num_done, 'pairs calculated in', stop - start
+                sys.stdout.flush()
 
-            if need_parallel:
-                ready.acquire()
-                if algo == "svc":
-                    sys.stdout.flush()
-                    pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y), callback = upd_graph)
-                else: 
-                    pool.apply_async(make_genes_edge, args = (X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
+        if need_parallel:
+            ready.acquire()
+            if algo == "svc":
+                sys.stdout.flush()
+                pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y), callback = upd_graph)
+            else: 
+                pool.apply_async(make_genes_edge, args = (X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
+        else:
+            if algo == "svc":
+                g = make_genes_edge_svc(X[:, i], X[:, j], y)
             else:
-                if algo == "svc":
-                    g = make_genes_edge_svc(X[:, i], X[:, j], y)
-                else:
-                    g = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
-                upd_graph(g)
+                g = make_genes_edge(X_prob[:, i], X_prob[:, j], X[:, i], X[:, j], threshold_p)
+            upd_graph(g)
 
-            lid += 1
+        lid += 1
 
     if need_parallel:
         while done_tasks < num_pairs:
@@ -549,39 +561,54 @@ def get_degrees(G):
     degrees = np.array(g.vs.degree())
     return degrees
 
-def read_graphs(config, X, id_thr = None):
+def read_graphs_part(config, id_part, id_thr = None):
+    config.params["id_part"].set_tick(id_part)
+    data = np.load(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]))
+    if id_thr is None:
+        cur = data['G']
+        dcur = data['D']
+        idscur = data['IDS']
+    else:
+        cur = data['G'][id_thr]
+        dcur = None
+        idscur = None
+    data.close()
+    return cur, dcur, idscur
+    
+def read_graphs(config, X, need_G = True, id_thr = None):
     num_bytes = len(np.packbits(np.zeros((X.shape[0], 1), dtype = np.bool)))
-    G = np.zeros((X.shape[1] * (X.shape[1] - 1) / 2, num_bytes), dtype = np.uint8)
+    if need_G:
+        G = np.zeros((X.shape[1] * (X.shape[1] - 1) / 2, num_bytes), dtype = np.uint8)
+        lid = 0
+    else:
+        G = None
     print 'Read graph'
     sys.stdout.flush()
     start = timeit.default_timer()
-    lid = 0
     D = []
     IDS = []
-    for i in range(config.params["num_parts"].value):
-        config.params["id_part"].set_tick(i)
-        data = np.load(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]))
+    for id_part in range(config.params["num_parts"].value):
+        cur, dcur, idscur = read_graphs_part(config, id_part, id_thr)
+        
         stop = timeit.default_timer()
-        print 'Part', i, 'of graphs was read in', stop - start
+        print 'Part', id_part, 'of graphs was read in', stop - start
         sys.stdout.flush()
-        if id_thr is None:
-            cur = data['G']
-            dcur = data['D']
-            idscur = data['IDS']
-        else:
-            cur = data['G'][id_thr]
-        G[lid:(lid + cur.shape[0]), :] = cur
+        
+        if need_G:
+            G[lid:(lid + cur.shape[0]), :] = cur
+            lid += cur.shape[0]
+            
         D.extend(dcur.tolist())
         IDS.extend(idscur.tolist())
-        lid += cur.shape[0]
-        #else:
-        #    G = np.concatenate([G, data['G'][id_thr]])
+
         stop = timeit.default_timer()
-        print 'Part', i, 'of graphs was added in', stop - start
+        print 'Part', id_part, 'of graphs was added in', stop - start
         sys.stdout.flush()
-        data.close()
-    print lid, G.shape[0]
-    assert (lid == G.shape[0])
+    
+    if need_G:
+        print lid, G.shape[0]
+        assert (lid == G.shape[0])
     D = np.array(D).T
     IDS = np.array(IDS)
+    print D.shape, IDS.shape, IDS.dtype
     return G, D, IDS

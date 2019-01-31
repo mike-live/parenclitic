@@ -6,8 +6,8 @@ from infrastructure.configuration import param
 #from configurations.load_data_age import load_data_age
 #from configurations.ages_config import config
 
-#from configurations.load_data_mongoloids import load_data_mongoloids
-#from configurations.config_mongoloids import config
+from configurations.load_data_down_GSE52588 import load_data_down_GSE52588_cpgs
+from configurations.config_down_GSE52588_cpg import config
 
 #from configurations.load_data_mongoloids import load_data_mongoloids_horvath_cpgs
 #from configurations.config_mongoloids_cpg_horvath import config
@@ -28,8 +28,8 @@ from infrastructure.configuration import param
 #from configurations.load_data_cancer import load_data_cancer
 #from configurations.cancer_config import config
 
-from configurations.load_data_down_GSE63347 import load_data_down_GSE63347
-from configurations.config_down_GSE63347 import config
+#from configurations.load_data_down_GSE63347 import load_data_down_GSE63347
+#from configurations.config_down_GSE63347 import config
 
 #from configurations.load_data_down_GSE74486 import load_data_down_GSE74486
 #from configurations.config_down_GSE74486 import config
@@ -47,7 +47,7 @@ config.params["num_parts"] = param(config.info['run_num'], name = 'num_parts')
 config.upd_ticks()
 
 
-X, y, X_prob, _ = config_down_GSE63347()
+X, y, X_prob, _ = load_data_down_GSE52588_cpgs()
 
 config.save_params(include_set = config.params_sets["graphs"])
 # config.params["thr_p"].get_values()
