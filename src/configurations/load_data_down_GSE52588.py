@@ -64,8 +64,10 @@ def load_data_down_GSE52588_cpgs():
 
     print indices, X.shape
 
+    good_cpgs = ~np.isnan(X).any(axis=0)
     X = X[indices, :].T
-    X = X[:, ~np.isnan(X).any(axis=0)]
+    X = X[:, good_cpgs]
+    cpgs_names = cpgs_names[good_cpgs]
     print X.shape
     #X = X.T
 
@@ -80,7 +82,7 @@ def load_data_down_GSE52588_cpgs():
     sys.stdout.flush()
 
     mask = config.params[config.params["kde_mask"].value].value
-    return X, y, X[mask, :], cpgs_names    
+    return X, y, X[mask, :], cpgs_names
     
 def load_data_mongoloids_cpgs():
     from mongoloids_cpgs_config import config
