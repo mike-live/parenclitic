@@ -62,10 +62,10 @@ def load_data_down_GSE52588_cpgs():
     cpgs_names = np.array(cpgs_names)
     _, indices, _ = np.intersect1d(cpgs_names, cpgs_island, return_indices = True)
 
-    print indices, X.shape
-
-    good_cpgs = ~np.isnan(X).any(axis=0)
+    cpgs_names = cpgs_names[indices]
     X = X[indices, :].T
+    
+    good_cpgs = ~np.isnan(X).any(axis=0)
     X = X[:, good_cpgs]
     cpgs_names = cpgs_names[good_cpgs]
     print X.shape
@@ -78,7 +78,7 @@ def load_data_down_GSE52588_cpgs():
     
     config.params["num_cpgs"].value = min(X.shape[1], config.params["num_cpgs"].value)
     
-    print X.shape, config.params["num_cpgs"].value, y.shape
+    print X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape
     sys.stdout.flush()
 
     mask = config.params[config.params["kde_mask"].value].value
