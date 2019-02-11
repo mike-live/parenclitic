@@ -9,6 +9,7 @@ params = collections.OrderedDict([
     ("num_cpgs", param(150254, name = 'num_cpgs')), # 150254
     ("kde_mask", param('mothers_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
+    ("geotypes", param(['Island'], name = 'geotypes')),
     ("id_part", param(value_be = 0, value_en = 899, num_ticks = 900, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
     ("num_parts", param(900, name = 'num_parts')),

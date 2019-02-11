@@ -81,8 +81,21 @@ def load_data_down_GSE52588_cpgs():
     print X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape
     sys.stdout.flush()
 
-    mask = config.params[config.params["kde_mask"].value].value
-    return X, y, X[mask, :], cpgs_names
+    mask = y.copy()
+    if config.params["kde_mask"].value == "mothers_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["mothers_mask"].value] = 1
+        mask[config.params["siblings_mask"].value] = 2
+    elif config.params["kde_mask"].value == "siblings_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["siblings_mask"].value] = 1
+        mask[config.params["mothers_mask"].value] = 2
+    elif config.params["kde_mask"].value == "healthy_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["siblings_mask"].value] = 1
+        mask[config.params["mothers_mask"].value] = 1
+        
+    return X, y, mask, cpgs_names
     
 def load_data_mongoloids_cpgs():
     from mongoloids_cpgs_config import config
