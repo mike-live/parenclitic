@@ -47,10 +47,10 @@ config.params["num_parts"] = param(config.info['run_num'], name = 'num_parts')
 config.upd_ticks()
 
 
-X, y, X_prob, _ = load_data_down_GSE52588_cpgs()
+X, y, mask, _ = load_data_down_GSE52588_cpgs()
 
 config.save_params(include_set = config.params_sets["graphs"])
 # config.params["thr_p"].get_values()
 
-G, D, IDS = make_graphs_part(X_prob, X, y, None, config.params["id_part"].value, config.params["num_parts"].value, num_workers = config.params["num_workers"].value, algo = config.params["algorithm"].value)
+G, D, IDS = make_graphs_part(mask, X, y, None, config.params["id_part"].value, config.params["num_parts"].value, num_workers = config.params["num_workers"].value, algo = config.params["algorithm"].value)
 np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]), G = G, D = D, IDS = IDS)
