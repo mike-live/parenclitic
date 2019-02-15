@@ -15,6 +15,7 @@ import scipy.integrate as integrate
 import numpy as np
 import pandas as pd
 import timeit
+import graphs_aux
 from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 
@@ -53,6 +54,7 @@ def make_graph(G, w):
     print 'make_graph_finished'
     sys.stdout.flush()
     return g
+
 
 
 def robustness(g):
@@ -286,25 +288,25 @@ def parenclitic_feature_names():
     return feature_names    
 
 
-def parenclitic_transform(x, kdes = None, p = None, I = None, G = None, threshold_p = 0.5, min_x = 0, max_x = 1, graph_path = '', id_patient = -1, genes_names = []):
-    print 'parenclitic_transform', G.sum()
+def parenclitic_transform(x = None, kdes = None, p = None, I = None, G = None, IDS = None, w = None, g = None, threshold_p = 0.5, min_x = 0, max_x = 1, graph_path = '', id_patient = -1, genes_names = []):
+    print 'parenclitic_transform'
     sys.stdout.flush()
-    if G is None:
-        start = timeit.default_timer()
-        w = make_weights(x, kdes, p, I, min_x, max_x)
-        stop = timeit.default_timer()
-        print 'Time weights', stop - start
-    
-        start = timeit.default_timer()
-        g = make_graph(w > threshold_p, w)
-        stop = timeit.default_timer()
-        print 'Make graph', stop - start
-    else:
-        w = G
-        start = timeit.default_timer()
-        g = make_graph(G, w)
-        stop = timeit.default_timer()
-        print 'Make graph', stop - start
+    if g is None:
+        if G is None:
+            start = timeit.default_timer()
+            w = make_weights(x, kdes, p, I, min_x, max_x)
+            stop = timeit.default_timer()
+            print 'Time weights', stop - start
+        
+            start = timeit.default_timer()
+            g = make_graph(w > threshold_p, w)
+            stop = timeit.default_timer()
+            print 'Make graph', stop - start
+        else:
+            start = timeit.default_timer()
+            g = graphs_aux.make_graph(G = G, weights = w, edges = IDS)
+            stop = timeit.default_timer()
+            print 'Make graph', stop - start
     sys.stdout.flush()
 
     '''
@@ -377,7 +379,7 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
             G[i] = np.ones((X_i.shape[0]), dtype=np.bool)
     return G
 
-def make_genes_edge_svc(X_i, X_j, y, mask):
+def make_genes_edge_svc(X_i, X_j, y, mask, min_score):
     from sklearn import svm, datasets
     from scipy import stats
     #clf = svm.SVC(kernel = 'linear', C = 1, class_weight = "balanced")
@@ -385,11 +387,18 @@ def make_genes_edge_svc(X_i, X_j, y, mask):
     sys.stdout.flush()
     data = stats.zscore(np.array([X_i, X_j]).T)
     fit_mask = (mask == 0) | (mask == 1)
+    '''
+    print y
+    print mask
+    print fit_mask
+    print y[fit_mask] == 0
+    print data[fit_mask]
+    '''
     clf.fit(data[fit_mask], y[fit_mask] == 0)
     G = clf.predict(data) == 1
-    score = clf.score(data[fit_mask], y[fit_mask])
+    score = clf.score(data[fit_mask], y[fit_mask] == 0)
     
-    if score < 0.75:
+    if score < min_score:
         G[:] = False
     G = G.reshape((1, len(G)))
     D = clf.decision_function(data)
@@ -402,7 +411,7 @@ def make_genes_edges(X_prob, X, y, threshold_p):
         G[:, 0, j] = make_genes_edge_svc(X[:, i], X[:, j], y)
     return G
 
-def parenclitic_graphs(mask, X, y, get_ids, threshold_p = 0.5, num_workers = 1, algo = "svc"): # skip_values = lambda i, j: i >= j
+def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, threshold_p = 0.5, num_workers = 1, algo = "svc"): # skip_values = lambda i, j: i >= j
     if not threshold_p is None and not isinstance(threshold_p, collections.Iterable):
         threshold_p = [threshold_p]
 
@@ -476,12 +485,12 @@ def parenclitic_graphs(mask, X, y, get_ids, threshold_p = 0.5, num_workers = 1, 
             ready.acquire()
             if algo == "svc":
                 sys.stdout.flush()
-                pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y, mask), callback = upd_graph)
+                pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y, mask, min_score), callback = upd_graph)
             else: 
                 pool.apply_async(make_genes_edge, args = (X[mask == 1, i], X[mask == 1, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
         else:
             if algo == "svc":
-                g = make_genes_edge_svc(X[:, i], X[:, j], y, mask)
+                g = make_genes_edge_svc(X[:, i], X[:, j], y, mask, min_score)
             else:
                 g = make_genes_edge(X[mask == 1, i], X[mask == 1, j], X[:, i], X[:, j], threshold_p)
             upd_graph(g)
@@ -593,6 +602,7 @@ def read_graphs(config, X, need_G = True, id_thr = None):
         
         stop = timeit.default_timer()
         print 'Part', id_part, 'of graphs was read in', stop - start
+        print 'Part', id_part, 'of graphs consist of', len(dcur), 'edges'
         sys.stdout.flush()
         
         if need_G:

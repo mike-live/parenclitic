@@ -11,25 +11,38 @@ def get_graph_file(config, id_thr = 0, id_sample = 0):
     print fname
     data = np.load(fname)
     return data
-    
-def load_graph(config, X, features_names, id_thr = 0, id_sample = 0):
+
+def make_graph(edges = None, weights = None, G = None, features_names = None, num_vertices = None):
+    if not features_name is None:
+        num_vertices = len(features_name)
+    if not edges is None:
+        if num_vertices is None:
+            num_vertices = edges.max() + 1
+        edges = edges[weights > 0]
+        weights = weights[weights > 0]
+        
+        g = igraph.Graph(n = num_vertices, edges = zip(*edges.T))
+        g.es["weight"] = weights
+    elif not G is None:
+        if num_vertices is None:
+            num_vertices = G.shape[0]
+        G = np.unpackbits(G, axis = 1)[:, :num_vertices].astype(np.bool)
+        g = igraph.Graph.Weighted_Adjacency(G.tolist(), mode=igraph.ADJ_UNDIRECTED)
+    else:
+        return None
+        
+    if not features_names is None:
+        g.vs["name"] = features_names
+        g.vs["label"] = features_names
+    return g
+
+
+def load_graph(config, features_names = None, num_vertices = None, id_thr = 0, id_sample = 0):
     data = get_graph_file(config, id_thr, id_sample)
     if 'IDS' in data:
-        d = data['D']
-        ids = data['IDS']
-        
-        ids = ids[d > 0]
-        d = d[d > 0]
-        
-        g = igraph.Graph(n = X.shape[1], edges = zip(*ids.T))
-        g.es["weight"] = d
+        g = make_graph(edges = data['IDS'], weights = data['D'], features_names = features_names, num_vertices = num_vertices)
     else:
-        g = data['G']
-        g = np.unpackbits(g, axis = 1)[:, :X.shape[1]].astype(np.bool)
-        g = igraph.Graph.Weighted_Adjacency(g.tolist(), mode=igraph.ADJ_UNDIRECTED)
-    
-    g.vs["name"] = features_names
-    g.vs["label"] = features_names
+        g = make_graph(G = data['G'], features_names = features_names, num_vertices = num_vertices)
     return g
 
 def graph_to_crs(g):
