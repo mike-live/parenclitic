@@ -13,7 +13,7 @@ def get_graph_file(config, id_thr = 0, id_sample = 0):
     return data
 
 def make_graph(edges = None, weights = None, G = None, features_names = None, num_vertices = None):
-    if not features_name is None:
+    if not features_names is None:
         num_vertices = len(features_name)
     if not edges is None:
         if num_vertices is None:
