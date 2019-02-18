@@ -1,7 +1,10 @@
 import pandas as pd
 import os
-def load_parenclitics(config, by_sample = False):
+def load_parenclitics(config, by_sample = False, id_thr = 0):
     if by_sample:
+        if "thr_p" in config.params:
+            config.params["thr_p"].set_tick(id_thr)
+
         parenclitics = None
         for id_sample in config.params["id_sample"]:    
             parenclitic = None
@@ -12,7 +15,7 @@ def load_parenclitics(config, by_sample = False):
             txt_file = config.ofname(["parenclitic"], ext = ".txt", include_set = config.params_sets["parenclitic_sample"])
             if os.path.exists(txt_file):
                 parenclitic = pd.read_csv(txt_file, sep=" ", header=None).T
-                
+
             if parenclitics is None:
                 parenclitics = parenclitic
             else:

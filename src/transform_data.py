@@ -57,14 +57,22 @@ def make_graph(G, w):
 
 
 
-def robustness(g):
+def _robustness(g):
     cnt = 0
     while g.vcount() > 0:
         degrees = np.array(g.degree())
         max_degree = np.max(degrees)
         if max_degree == 0:
             break
-        g.delete_vertices(np.flatnonzero(max_degree == degrees))
+        g.delete_vertices(np.flatnonzero(max_degree == degrees)[0])
+        cnt = cnt + 1
+    return cnt
+
+def robustness(g):
+    cnt = 0
+    while g.ecount() > 0:
+        degrees = np.array(g.degree())
+        g.delete_vertices(np.argmax(degrees))
         cnt = cnt + 1
     return cnt
 
@@ -97,6 +105,9 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
 
     shortest_paths = np.array(g.shortest_paths(weights = weights))
     shortest_paths = shortest_paths[(shortest_paths > 0) & (shortest_paths != np.inf)]
+    print 'here'
+    sys.stdout.flush()
+
     efficiency = 0
     if len(shortest_paths) > 0:
         efficiency = (1.0 / shortest_paths).sum() / (g.vcount() * (g.vcount() - 1))
@@ -168,7 +179,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
         
     start = timeit.default_timer()
     
-    largest = g.clusters().giant()
+    largest = g.clusters().giant()    
     m = np.array(largest.get_adjacency().data)
     sys.stdout.flush()
 
