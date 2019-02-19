@@ -3,6 +3,26 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import sys
 
+def get_classes(config, X):
+    y = np.zeros((X.shape[0], ), dtype = 'uint8')
+    y[config.params["mongoloids_mask"].value] = 0
+    y[config.params["siblings_mask"].value] = 1
+    y[config.params["mothers_mask"].value] = 2
+    mask = y.copy()
+    if config.params["kde_mask"].value == "mothers_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["mothers_mask"].value] = 1
+        mask[config.params["siblings_mask"].value] = 2
+    elif config.params["kde_mask"].value == "siblings_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["siblings_mask"].value] = 1
+        mask[config.params["mothers_mask"].value] = 2
+    elif config.params["kde_mask"].value == "healthy_mask":
+        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["siblings_mask"].value] = 1
+        mask[config.params["mothers_mask"].value] = 1
+    return y, mask
+
 def load_data_down_GSE52588():
     from configurations.config_down_GSE52588 import config
     start = timeit.default_timer()
@@ -28,16 +48,12 @@ def load_data_down_GSE52588():
 
     X = X[indices, :].T
     #X = X.T
+    y, mask = get_classes(config, X)
 
-    y = np.zeros((X.shape[0], 1), dtype = 'uint8')
-    y[config.params["mongoloids_mask"].value] = 0
-    y[config.params["siblings_mask"].value] = 1
-    y[config.params["mothers_mask"].value] = 2
     print X.shape, config.params["num_genes"].value
     sys.stdout.flush()
 
-    mask = config.params[config.params["kde_mask"].value].value
-    return X, y, X[mask, :], genes_names
+    return X, y, mask, genes_names
 
 def load_data_down_GSE52588_cpgs():
     from configurations.config_down_GSE52588_cpg import config
@@ -70,30 +86,13 @@ def load_data_down_GSE52588_cpgs():
     cpgs_names = cpgs_names[good_cpgs]
     print X.shape
     #X = X.T
-
-    y = np.zeros((X.shape[0], ), dtype = 'uint8')
-    y[config.params["mongoloids_mask"].value] = 0
-    y[config.params["siblings_mask"].value] = 1
-    y[config.params["mothers_mask"].value] = 2
     
     config.params["num_cpgs"].value = min(X.shape[1], config.params["num_cpgs"].value)
-    
+    y, mask = get_classes(config, X)
+    #print y 
+    #print mask
     print X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape
     sys.stdout.flush()
-
-    mask = y.copy()
-    if config.params["kde_mask"].value == "mothers_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
-        mask[config.params["mothers_mask"].value] = 1
-        mask[config.params["siblings_mask"].value] = 2
-    elif config.params["kde_mask"].value == "siblings_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
-        mask[config.params["siblings_mask"].value] = 1
-        mask[config.params["mothers_mask"].value] = 2
-    elif config.params["kde_mask"].value == "healthy_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
-        mask[config.params["siblings_mask"].value] = 1
-        mask[config.params["mothers_mask"].value] = 1
         
     return X, y, mask, cpgs_names
     

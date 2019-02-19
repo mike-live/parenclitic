@@ -9,6 +9,7 @@ params = collections.OrderedDict([
     ("num_genes", param(15024, name = 'num_genes')), # 15024, 20270
     ("kde_mask", param('mothers_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
+    ("min_score", param(0.9, name = 'min_score')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
     ("num_parts", param(30, name = 'num_parts')),
