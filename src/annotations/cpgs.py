@@ -8,7 +8,7 @@ def is_intersect(a, b):
     #    a = [a]
     #if not hasattr(b, '__len__'):
     #    b = [b]
-    print a, b
+    #   print a, b
     if len(a) > len(b):
         a, b = b, a
     if type(b) is set:
