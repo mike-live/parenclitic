@@ -48,10 +48,10 @@ def get_part(id_part, num_parts, num_features):
     sys.stdout.flush()
     return get_ids
     
-def make_graphs_part(mask, X, y, threshold_p, id_part, num_parts, num_workers = 1, algo = "svc"):
+def make_graphs_part(mask, X, y, threshold_p, id_part, num_parts, num_workers = 1, algo = "svc", min_score = 0.75):
     start = timeit.default_timer()
     get_ids = get_part(id_part, num_parts, X.shape[1])
-    G = parenclitic_graphs(mask, X, y, get_ids, threshold_p, num_workers = num_workers, algo = algo)
+    G = parenclitic_graphs(mask, X, y, get_ids, min_score, threshold_p, num_workers = num_workers, algo = algo)
     #skip_values = lambda i, j: (i >= j) or (be_part > i * X.shape[1] + j or i * X.shape[1] + j > en_part)
     stop = timeit.default_timer()
     print 'Make graphs: ', stop - start 
