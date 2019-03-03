@@ -2,6 +2,7 @@ import numpy as np
 import igraph
 import scipy
 import struct
+import array
 
 def get_graph_file(config, id_thr = 0, id_sample = 0):
     config.params["id_sample"].set_tick(id_sample)
@@ -14,7 +15,7 @@ def get_graph_file(config, id_thr = 0, id_sample = 0):
 
 def make_graph(edges = None, weights = None, G = None, features_names = None, num_vertices = None):
     if not features_names is None:
-        num_vertices = len(features_name)
+        num_vertices = len(features_names)
     if not edges is None:
         if num_vertices is None:
             num_vertices = edges.max() + 1
@@ -46,15 +47,19 @@ def load_graph(config, features_names = None, num_vertices = None, id_thr = 0, i
     return g
 
 def graph_to_crs(g):
-    m = g.get_adjacency()
-    m = scipy.sparse.csr_matrix(m)
+    if g.ecount() > g.vcount() * g.vcount() / 10:
+        m = np.array(g.get_adjacency().data).astype('int8')
+        m = scipy.sparse.csr_matrix(m)
+    else:
+        edges = np.array([np.array(edge.tuple) for edge in g.es])
+        edges = np.concatenate([edges.T, [edges[:, 1], edges[:, 0]]], axis = 1)
+        m = scipy.sparse.csr_matrix((np.ones(edges.shape[1]), edges), shape=(g.vcount(), g.vcount()))
     return m
 
 def save_crs(file_name, m):
     with open(file_name, 'wb') as f:
         n = int(m.shape[0])
-        f.write(struct.pack('>i', n))
-        f.write(m.nnz.to_bytes(4, byteorder='big', signed=True))
-        f.write(m.indices.to_bytes(4, byteorder='big', signed=True))
-        f.write(m.indptr.to_bytes(4, byteorder='big', signed=True))
-        
+        f.write(struct.pack('<i', n))
+        f.write(struct.pack('<i', m.nnz))
+        f.write(array.array('i', m.indices).tostring())
+        f.write(array.array('i', m.indptr).tostring())        
