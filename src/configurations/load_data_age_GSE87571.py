@@ -10,7 +10,7 @@ def get_classes(config, X):
     num_groups = config.params["num_groups"].value
     #age_group = config.params["age_group"].value
     bins = np.percentile(age, np.linspace(0, 100, num_groups + 1))
-    y = np.digitize(age, bins) - 1
+    y = np.minimum(np.digitize(age, bins), num_groups) - 1
 
     config.params["young_mask"].value = np.flatnonzero(y == 1)
     config.params["old_mask"].value = np.flatnonzero(y == 0)
