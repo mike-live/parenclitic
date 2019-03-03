@@ -397,7 +397,7 @@ def make_genes_edge_svc(X_i, X_j, y, mask, min_score, by_group):
 
     if by_group:
         classes = np.unique(y)
-        G = np.zeros((len(y), ), np.boolean)
+        G = np.zeros((len(y), ), np.bool)
         D = np.zeros((len(y), ), np.float32)
         for c in classes:
             fit_mask = (y == c) | (mask == 1)
