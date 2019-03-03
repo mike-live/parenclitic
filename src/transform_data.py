@@ -1,7 +1,7 @@
-import matplotlib as mpl
-mpl.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.pylab as pylab
+#import matplotlib as mpl
+#mpl.use('Agg')
+#import matplotlib.pyplot as plt
+#import matplotlib.pylab as pylab
 
 #from multiprocessing.pool import ThreadPool as Pool
 from multiprocessing.pool import Pool
@@ -390,29 +390,43 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
             G[i] = np.ones((X_i.shape[0]), dtype=np.bool)
     return G
 
-def make_genes_edge_svc(X_i, X_j, y, mask, min_score):
+def make_genes_edge_svc(X_i, X_j, y, mask, min_score, by_group):
     from sklearn import svm, datasets
     from scipy import stats
-    #clf = svm.SVC(kernel = 'linear', C = 1, class_weight = "balanced")
-    clf = svm.LinearSVC(C = 1, class_weight = "balanced")
-    sys.stdout.flush()
     data = stats.zscore(np.array([X_i, X_j]).T)
-    fit_mask = (mask == 0) | (mask == 1)
-    '''
-    print y
-    print mask
-    print fit_mask
-    print y[fit_mask] == 0
-    print data[fit_mask]
-    '''
-    clf.fit(data[fit_mask], y[fit_mask] == 0)
-    G = clf.predict(data) == 1
-    score = clf.score(data[fit_mask], y[fit_mask] == 0)
+
+    if by_group:
+        classes = np.unique(y)
+        G = np.zeros((len(y), ))
+        D = np.zeros((len(y), ))
+        for c in classes:
+            fit_mask = (y == c) | (mask == 1)
+            if len(np.unique(y[fit_mask])) == 1:
+                continue
+            clf = svm.LinearSVC(C = 1, class_weight = "balanced")
+            clf.fit(data[fit_mask], y[fit_mask] == 0)
+            score = clf.score(data[fit_mask], y[fit_mask] == 0)
+            
+            G[y == c] = clf.predict(data[y == c]) == 1
+            D[y == c] = clf.decision_function(data[y == c])
+            if score < min_score:
+                G[fit_mask] = False
+                
+        G = G.reshape((1, len(G)))
+    else:
+        clf = svm.LinearSVC(C = 1, class_weight = "balanced")
     
-    if score < min_score:
-        G[:] = False
-    G = G.reshape((1, len(G)))
-    D = clf.decision_function(data)
+        #clf = svm.SVC(kernel = 'linear', C = 1, class_weight = "balanced")
+        fit_mask = (mask == 0) | (mask == 1)
+        
+        clf.fit(data[fit_mask], y[fit_mask] == 0)
+        G = clf.predict(data) == 1
+        score = clf.score(data[fit_mask], y[fit_mask] == 0)
+            
+        if score < min_score:
+            G[:] = False
+        G = G.reshape((1, len(G)))
+        D = clf.decision_function(data)
     return [G, D]
     
 def make_genes_edges(X_prob, X, y, threshold_p):
@@ -422,7 +436,7 @@ def make_genes_edges(X_prob, X, y, threshold_p):
         G[:, 0, j] = make_genes_edge_svc(X[:, i], X[:, j], y)
     return G
 
-def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, threshold_p = 0.5, num_workers = 1, algo = "svc"): # skip_values = lambda i, j: i >= j
+def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, by_group = False, threshold_p = 0.5, num_workers = 1, algo = "svc"): # skip_values = lambda i, j: i >= j
     if not threshold_p is None and not isinstance(threshold_p, collections.Iterable):
         threshold_p = [threshold_p]
 
@@ -496,12 +510,12 @@ def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, threshold_p = 0.5,
             ready.acquire()
             if algo == "svc":
                 sys.stdout.flush()
-                pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y, mask, min_score), callback = upd_graph)
+                pool.apply_async(make_genes_edge_svc, args = (X[:, i], X[:, j], y, mask, min_score, by_group), callback = upd_graph)
             else: 
                 pool.apply_async(make_genes_edge, args = (X[mask == 1, i], X[mask == 1, j], X[:, i], X[:, j], threshold_p), callback = upd_graph)
         else:
             if algo == "svc":
-                g = make_genes_edge_svc(X[:, i], X[:, j], y, mask, min_score)
+                g = make_genes_edge_svc(X[:, i], X[:, j], y, mask, min_score, by_group)
             else:
                 g = make_genes_edge(X[mask == 1, i], X[mask == 1, j], X[:, i], X[:, j], threshold_p)
             upd_graph(g)

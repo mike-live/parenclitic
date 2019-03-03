@@ -9,8 +9,8 @@ from infrastructure.configuration import param
 #from configurations.load_data_down_GSE52588 import load_data_down_GSE52588_cpgs
 #from configurations.config_down_GSE52588_cpg import config
 
-from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
-from configurations.config_down_GSE52588 import config
+#from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
+#from configurations.config_down_GSE52588 import config
 
 #from configurations.load_data_mongoloids import load_data_mongoloids_horvath_cpgs
 #from configurations.config_mongoloids_cpg_horvath import config
@@ -27,6 +27,9 @@ from configurations.config_down_GSE52588 import config
 
 #from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
 #from configurations.config_age_GSE87571_cpg_horvath import config
+
+from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
+from configurations.config_age_GSE87571 import config
 
 #from configurations.load_data_cancer import load_data_cancer
 #from configurations.cancer_config import config
@@ -50,7 +53,7 @@ config.params["num_parts"] = param(config.info['run_num'], name = 'num_parts')
 config.upd_ticks()
 
 
-X, y, mask, _ = load_data_down_GSE52588()
+X, y, mask, _, _ = load_data_age_GSE87571()
 
 config.save_params(include_set = config.params_sets["graphs"])
 # config.params["thr_p"].get_values()
@@ -59,5 +62,6 @@ G, D, IDS = make_graphs_part(mask, X, y, None, config.params["id_part"].value,
                                                config.params["num_parts"].value, 
                                                num_workers = config.params["num_workers"].value, 
                                                algo = config.params["algorithm"].value,
-                                               min_score = config.params["min_score"].value)
+                                               min_score = config.params["min_score"].value,
+                                               by_group = "num_groups" in config.params)
 np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]), G = G, D = D, IDS = IDS)
