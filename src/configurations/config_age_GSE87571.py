@@ -24,6 +24,7 @@ files = {
     "gene_chromosome": 'gene_chr.txt',
     "x": 'beta_genes_mean.npz',
     "patients_info": "GSE87571_samples.txt",
+    "cpgs_annotations": "cpgs_annotations.txt",
     "g": 'graph',
     "kdes": Path('kdes') / 'kdes',
     "graphs": 'graphs',

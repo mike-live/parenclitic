@@ -77,10 +77,12 @@ def load_data_age_GSE87571_cpgs():
     cpgs_names = cpgs_names[good_cpgs]
     print X.shape
     
+    y, mask, age = get_classes(config, X)
+    
     config.params["num_cpgs"].value = min(X.shape[1], config.params["num_cpgs"].value)
-
+    
     #patients_info = np.genfromtxt(config.ifname("patients_info"), dtype='str', usecols = 1)
-    return X, y, X[mask, :], cpgs_names, age    
+    return X, y, mask, cpgs_names, age    
     
 def load_data_age_GSE87571_cpg_horvath():
     from configurations.config_age_GSE87571_cpg_horvath import config

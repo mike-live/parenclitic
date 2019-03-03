@@ -8,9 +8,9 @@ from pathlib2 import Path
 params = collections.OrderedDict([
     ("num_cpgs", param(353, name = 'num_cpgs')), 
     ("input", param('horvath_cpg', name = 'input')),
-    ("kde_mask", param('young_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
-    ("delimiter_age", param(65, name = 'delimiter_age')), 
+    ("min_score", param(0.9, name = 'min_score')),
+    ("num_groups", param(4, name = 'num_groups')),  
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
 #    ("thr_p", param(value_be = 0.1, value_en = 0.9, num_ticks = 9, name = 'threshold_p')),
     ("id_sample", param(value_be = 0, value_en = 728, num_ticks = 729, name = 'id_sample')),
