@@ -53,7 +53,8 @@ def graph_to_crs(g):
     else:
         edges = np.array([np.array(edge.tuple) for edge in g.es])
         edges = np.concatenate([edges.T, [edges[:, 1], edges[:, 0]]], axis = 1)
-        m = scipy.sparse.csr_matrix((np.ones(edges.shape[1]), edges), shape=(g.vcount(), g.vcount()))
+        weights = np.concatenate([g.es['weight'], g.es['weight']])
+        m = scipy.sparse.csr_matrix((weights, edges), shape=(g.vcount(), g.vcount()))
     return m
 
 def save_crs(file_name, m):
@@ -62,4 +63,5 @@ def save_crs(file_name, m):
         f.write(struct.pack('<i', n))
         f.write(struct.pack('<i', m.nnz))
         f.write(array.array('i', m.indices).tostring())
-        f.write(array.array('i', m.indptr).tostring())        
+        f.write(array.array('i', m.indptr).tostring())
+        f.write(array.array('d', m.data).tostring())
