@@ -404,8 +404,8 @@ def make_genes_edge_svc(X_i, X_j, y, mask, min_score, by_group):
             if len(np.unique(y[fit_mask])) == 1:
                 continue
             clf = svm.LinearSVC(C = 1, class_weight = "balanced")
-            clf.fit(data[fit_mask], y[fit_mask] == 0)
-            score = clf.score(data[fit_mask], y[fit_mask] == 0)
+            clf.fit(data[fit_mask], y[fit_mask] == c)
+            score = clf.score(data[fit_mask], y[fit_mask] == c)
             
             G[y == c] = clf.predict(data[y == c]) == 1
             D[y == c] = clf.decision_function(data[y == c])
