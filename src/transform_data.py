@@ -77,7 +77,7 @@ def robustness(g):
     return cnt
 
 
-def calculate_metrics(g, w, need_weights = False, get_big = True):
+def calculate_metrics(g, w, need_weights = True, get_big = True):
     print 'Metrics'
     sys.stdout.flush()
 
@@ -92,6 +92,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
     degrees = np.array(g.vs.degree())
     if get_big: 
         parenclitic['degrees'] = [degrees]
+    parenclitic['min_degrees'] = np.min (degrees)
     parenclitic['max_degrees'] = np.max (degrees)
     parenclitic['mean_degrees'] = np.mean(degrees)
     parenclitic['std_degrees'] = np.std (degrees)
@@ -125,6 +126,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
     betweenness = g.betweenness(weights = weights)
     if get_big: 
         parenclitic['betweenness'] = [np.array(betweenness)]
+    parenclitic['min_betweenness'] = np.min (betweenness)
     parenclitic['max_betweenness'] = np.max (betweenness)
     parenclitic['mean_betweenness'] = np.mean(betweenness)
     parenclitic['std_betweenness'] = np.std (betweenness)
@@ -140,6 +142,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
     closeness = g.closeness(weights = weights)
     if get_big: 
         parenclitic['closeness'] = [np.array(closeness)]
+    parenclitic['min_closeness'] = np.min (closeness)
     parenclitic['max_closeness'] = np.max (closeness)
     parenclitic['mean_closeness'] = np.mean(closeness)
     parenclitic['std_closeness'] = np.std (closeness)
@@ -154,6 +157,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
     pagerank = g.pagerank(weights = weights)
     if get_big: 
         parenclitic['pagerank'] = [np.array(pagerank)]
+    parenclitic['min_pagerank'] = np.min (pagerank)
     parenclitic['max_pagerank'] = np.max (pagerank)
     parenclitic['mean_pagerank'] = np.mean(pagerank)
     parenclitic['std_pagerank'] = np.std (pagerank)
@@ -170,7 +174,10 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
     eigenvector_centrality = g.eigenvector_centrality(weights = weights)
     if get_big: 
         parenclitic['eigenvector_centrality'] = [np.array(eigenvector_centrality)]
+    parenclitic['min_eigenvector_centrality'] = np.min(eigenvector_centrality)
+    parenclitic['max_eigenvector_centrality'] = np.max(eigenvector_centrality)
     parenclitic['mean_eigenvector_centrality'] = np.mean(eigenvector_centrality)
+    parenclitic['std_eigenvector_centrality'] = np.std(eigenvector_centrality)
     eigenvector_centrality = None
 
     stop = timeit.default_timer()
@@ -231,6 +238,7 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
         weights = np.array(g.es["weight"])
         if get_big: 
             parenclitic['weights'] = [np.array(weights)]
+        parenclitic['min_weights'] = np.min (weights)
         parenclitic['max_weights'] = np.max (weights)
         parenclitic['mean_weights'] = np.mean(weights)
         parenclitic['std_weights'] = np.std (weights)
@@ -257,28 +265,35 @@ def calculate_metrics(g, w, need_weights = False, get_big = True):
 def parenclitic_feature_names():
     feature_names = {}
     feature_names['degrees'] = 'Degrees'
+    feature_names['min_degrees'] = 'Min degrees'
     feature_names['max_degrees'] = 'Max degrees'
     feature_names['mean_degrees'] = 'Mean degrees'
     feature_names['std_degrees'] = 'Std degrees'
     
     feature_names['efficiency'] = 'Efficiency'
     feature_names['betweenness'] = 'Betweenness'
+    feature_names['min_betweenness'] = 'Min betweenness'
     feature_names['max_betweenness'] = 'Max betweenness'
     feature_names['mean_betweenness'] = 'Mean betweenness'
     feature_names['std_betweenness'] = 'Std betweenness'
     
     feature_names['closeness'] = 'Closeness'
+    feature_names['min_closeness'] = 'Min closeness'
     feature_names['max_closeness'] = 'Max closeness'
     feature_names['mean_closeness'] = 'Mean closeness'
     feature_names['std_closeness'] = 'Std closeness'
     
     feature_names['pagerank'] = 'Pagerank'
+    feature_names['min_pagerank'] = 'Min pagerank'
     feature_names['max_pagerank'] = 'Max pagerank'
     feature_names['mean_pagerank'] = 'Mean pagerank'
     feature_names['std_pagerank'] = 'Std pagerank'
     
     feature_names['eigenvalues'] = 'Eigenvalues'
+    feature_names['min_eigenvector_centrality'] = 'Min eigenvector centrality'
+    feature_names['max_eigenvector_centrality'] = 'Max eigenvector centrality'
     feature_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'
+    feature_names['std_eigenvector_centrality'] = 'Std eigenvector centrality'
     feature_names['num_edges'] = 'Number of edges'
 
     feature_names['eigenvalues_intervals'] = 'Eigenvalues intervals'
@@ -289,6 +304,7 @@ def parenclitic_feature_names():
     feature_names['mean_IPR'] = 'Mean IPR'
 
     feature_names['weights'] = 'Weights'
+    feature_names['min_weights'] = 'Min weights'
     feature_names['max_weights'] = 'Max weights'
     feature_names['mean_weights'] = 'Mean weights'
     feature_names['std_weights'] = 'Std weights'
