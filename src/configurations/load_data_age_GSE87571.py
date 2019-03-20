@@ -7,11 +7,15 @@ import pandas as pd
 def get_classes(config, X):
     patients_info = pd.read_csv(config.ifname("patients_info"), sep = ' ')
     age = patients_info['age']
-    num_groups = config.params["num_groups"].value
-    #age_group = config.params["age_group"].value
-    bins = np.percentile(age, np.linspace(0, 100, num_groups + 1))
+    if "num_groups" in config.params:
+        num_groups = config.params["num_groups"].value
+        bins = np.percentile(age, np.linspace(0, 100, num_groups + 1))
+        
+    elif "age_delimiter" in config.params:
+        num_groups = 2
+        bins = np.array([0, age_delimiter, 100])
+        
     y = np.minimum(np.digitize(age, bins), num_groups) - 1
-
     config.params["young_mask"].value = np.flatnonzero(y == 1)
     config.params["old_mask"].value = np.flatnonzero(y == 0)
 
