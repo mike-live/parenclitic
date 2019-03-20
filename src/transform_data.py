@@ -68,10 +68,10 @@ def _robustness(g):
         cnt = cnt + 1
     return cnt
 
-def robustness(g):
+def robustness(g, weights = None):
     cnt = 0
     while g.ecount() > 0:
-        degrees = np.array(g.degree())
+        degrees = np.array(g.strength(weights = weights))
         g.delete_vertices(np.argmax(degrees))
         cnt = cnt + 1
     return cnt
@@ -89,7 +89,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     parenclitic = pd.DataFrame(index=[0])
     start = timeit.default_timer()
 
-    degrees = np.array(g.vs.degree())
+    degrees = np.array(g.strength(weights = weights))
     if get_big: 
         parenclitic['degrees'] = [degrees]
     parenclitic['min_degrees'] = np.min (degrees)
@@ -238,6 +238,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
         weights = np.array(g.es["weight"])
         if get_big: 
             parenclitic['weights'] = [np.array(weights)]
+        parenclitic['sum_weights'] = np.sum (weights)
         parenclitic['min_weights'] = np.min (weights)
         parenclitic['max_weights'] = np.max (weights)
         parenclitic['mean_weights'] = np.mean(weights)
@@ -255,13 +256,58 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     sys.stdout.flush()
         
     start = timeit.default_timer()
-    parenclitic['robustness'] = robustness(g)
+    parenclitic['robustness'] = robustness(g, weights)
     stop = timeit.default_timer()
     print 'Parenclitic 10', stop - start
     sys.stdout.flush()
 
     return parenclitic
 
+def parenclitic_feature_logscale():
+    feature_logscale = {
+        'degrees': False,
+        'max_degrees': True,
+        'mean_degrees': False,
+        'std_degrees': False,
+
+        'efficiency': True,
+        'betweenness': False,
+        'max_betweenness': True,
+        'mean_betweenness': True,
+        'std_betweenness': True,
+
+        'closeness': False,
+        'max_closeness': False,
+        'mean_closeness': False,
+        'std_closeness': True,
+
+        'pagerank': False,
+        'max_pagerank': True,
+        'mean_pagerank': True,
+        'std_pagerank': True,
+
+        'eigenvalues': False,
+        'mean_eigenvector_centrality': False,
+        'num_edges': False,
+
+        'eigenvalues_intervals': False,
+        'eigenvalues_intervals_normalized': False,
+
+        'IPR': False,
+        'max_IPR': False,
+        'mean_IPR': False,
+
+        'weights': False,
+        'max_weights': False,
+        'mean_weights': False,
+        'std_weights': False,
+
+        'community_edge_betweenness_optimal': False,
+
+        'robustness': False,
+    }
+    return feature_logscale
+    
 def parenclitic_feature_names():
     feature_names = {}
     feature_names['degrees'] = 'Degrees'
