@@ -85,6 +85,9 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
         weights = 'weight'
     else:
         weights = None
+        
+    if g.ecount() == 0:
+        weights = None
 
     parenclitic = pd.DataFrame(index=[0])
     start = timeit.default_timer()
