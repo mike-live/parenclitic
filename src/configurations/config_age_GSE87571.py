@@ -32,12 +32,14 @@ files = {
     "parenclitic": Path("parenclitics") / "parenclitic",
     "degrees_boxplots": "degrees_boxplots",
     "parenclitic_boxplots": "parenclitic_boxplots",
+    "parenclitic_ages": "parenclitic_ages",
     "degrees_all": 'degrees_all',
     "parenclitic_all": "parenclitic_all",
     "diff_graph": 'diff_graph',
     "pair_genes": Path('pair_genes') / 'pair_genes',
     "kdes_dist": Path('kdes_dist') / 'kdes_dist',
     "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
+    "parenclitic_age": Path("parenclitic_ages") / "parenclitic_age",
 }
 
 params_sets = {
