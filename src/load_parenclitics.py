@@ -19,7 +19,7 @@ def load_parenclitics(config, by_sample = False, id_thr = 0):
             if parenclitics is None:
                 parenclitics = parenclitic
             else:
-                parenclitics = pd.concat([parenclitics, parenclitic], ignore_index=True)
+                parenclitics = pd.concat([parenclitics, parenclitic], ignore_index=True, sort=True)
     else:
         parenclitics = []
         if "thr_p" in config.params:
