@@ -12,6 +12,7 @@ def get_classes(config, X):
         bins = np.percentile(age, np.linspace(0, 100, num_groups + 1))
         
     elif "age_delimiter" in config.params:
+        age_delimiter = config.params["age_delimiter"].value
         num_groups = 2
         bins = np.array([0, age_delimiter, 100])
         

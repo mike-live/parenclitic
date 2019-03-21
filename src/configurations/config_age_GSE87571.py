@@ -44,18 +44,18 @@ files = {
 }
 
 params_sets = {
-    "graphs": set(['num_genes', 'algorithm', 'num_groups', 'id_part', 'num_parts']),
-    "graph": set(['num_genes', 'algorithm', 'num_groups', 'id_sample']),
-    "degrees": set(['num_genes', 'algorithm', 'num_groups']),
-    "parenclitic": set(['num_genes', 'algorithm', 'num_groups']),
-    "degrees_sample": set(['num_genes', 'algorithm', 'num_groups', 'id_sample']),
-    "parenclitic_sample": set(['num_genes', 'algorithm', 'num_groups', 'id_sample']),
-    "degrees_boxplots": set(['num_genes', 'algorithm', 'num_groups']),
-    "parenclitic_boxplots": set(['num_genes', 'algorithm', 'num_groups']),
-    "diff_graph": set(['num_genes', 'algorithm', 'num_groups']),
-    "pair_genes": set(['num_genes', 'algorithm', 'num_groups', 'id_pair']),
-    "kdes": set(['num_genes', 'algorithm', 'num_groups', 'id_pair']),
-    "parenclitic_boxplot": set(['num_genes', 'algorithm', 'num_groups', 'id_parenclitic']),
+    "graphs": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_part', 'num_parts']),
+    "graph": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_sample']),
+    "degrees": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
+    "parenclitic": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
+    "degrees_sample": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_sample']),
+    "parenclitic_sample": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_sample']),
+    "degrees_boxplots": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
+    "parenclitic_boxplots": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
+    "diff_graph": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
+    "pair_genes": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_pair']),
+    "kdes": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_pair']),
+    "parenclitic_boxplot": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_parenclitic']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE87571', project_name = 'Gerontology', config_name = 'age', params_sets = params_sets)
