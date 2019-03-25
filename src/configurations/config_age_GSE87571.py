@@ -12,6 +12,7 @@ params = collections.OrderedDict([
     ("age_delimiter", param(28, name = 'age_delimiter')),
 #    ("num_groups", param(4, name = 'num_groups')),  
 #    ("age_group", param(value_be = 1, value_en = 4, num_ticks = 4, name = 'age_group')),  
+    ("by_group", param(True, name = 'by_group')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 728, num_ticks = 729, name = 'id_sample')),
     ("num_parts", param(30, name = 'num_parts')),

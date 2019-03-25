@@ -63,5 +63,5 @@ G, D, IDS = make_graphs_part(mask, X, y, None, config.params["id_part"].value,
                                                num_workers = config.params["num_workers"].value, 
                                                algo = config.params["algorithm"].value,
                                                min_score = config.params["min_score"].value,
-                                               by_group = "num_groups" in config.params)
+                                               by_group = ("by_group" in config.params) & (config.params['by_group'].value))
 np.savez_compressed(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graphs"]), G = G, D = D, IDS = IDS)
