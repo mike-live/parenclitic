@@ -353,6 +353,7 @@ def parenclitic_feature_names():
     feature_names['mean_IPR'] = 'Mean IPR'
 
     feature_names['weights'] = 'Weights'
+    feature_names['sum_weights'] = 'Sum weights'
     feature_names['min_weights'] = 'Min weights'
     feature_names['max_weights'] = 'Max weights'
     feature_names['mean_weights'] = 'Mean weights'
