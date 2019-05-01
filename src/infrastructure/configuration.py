@@ -121,7 +121,7 @@ class configuration:
             path_const_params.parent.mkdir(parents = True, exist_ok = True)
         return path_const_params
 
-    def ofname(self, names, ext = '', include_set = None, exclude_set = None, delimiter = '_'):
+    def ofname(self, names, ext = '', include_set = None, exclude_set = None, delimiter = '_', need_const = True, need_nonconst = True):
         path = Path('')
         if type(names) is list:
             for name in names:
@@ -131,7 +131,7 @@ class configuration:
                     path /= self.files.get(name, name)
         else:
             path /= self.files.get(names, names)
-        return str(self.get_path_params(path.with_name(path.name + ext), include_set, exclude_set, delimiter = delimiter))
+        return str(self.get_path_params(path.with_name(path.name + ext), include_set, exclude_set, delimiter = delimiter, need_const = need_const, need_nonconst = need_nonconst))
 
     def ifname(self, name):
         cur_path = self.data_path / self.files[name]
