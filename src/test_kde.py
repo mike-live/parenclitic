@@ -1,11 +1,11 @@
 import os
-print os.environ
+print(os.environ)
 
 import time
 import numpy as np
 from scipy.stats import gaussian_kde
 from threading import Thread
-from Queue import Queue
+from queue import Queue
 
 def make_G(X_prob_i, X_prob_j, X_i, X_j, threshold_p = 0.9):
     num_points = 10000
@@ -47,7 +47,7 @@ class CalcWorker(Thread):
                 G[:, i, j] = make_G(x[:num, i], x[:num, j], x[:, i], x[:, j])
             self.queue.task_done()
             en = time.time()
-            print i, 'Time: ', en - be
+            print(i, 'Time: ', en - be)
 
 def main():
     global x, G
@@ -84,7 +84,7 @@ def main():
     # Causes the main thread to wait for the queue to finish processing all the tasks
     queue.join()
 
-    print 'Took {}'.format(time.time() - ts)
-    print G.mean()
+    print('Took {}'.format(time.time() - ts))
+    print(G.mean())
 
 main()

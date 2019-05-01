@@ -15,7 +15,7 @@ import scipy.integrate as integrate
 import numpy as np
 import pandas as pd
 import timeit
-import graphs_aux
+from . import graphs_aux
 from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 
@@ -51,7 +51,7 @@ def make_weights(x, kdes, p, I, min_x, max_x):
 def make_graph(G, w):
     g = igraph.Graph.Weighted_Adjacency(w.tolist(), mode=igraph.ADJ_UNDIRECTED)
 
-    print 'make_graph_finished'
+    print('make_graph_finished')
     sys.stdout.flush()
     return g
 
@@ -78,7 +78,7 @@ def robustness(g, weights = None):
 
 
 def calculate_metrics(g, w, need_weights = True, get_big = True):
-    print 'Metrics'
+    print('Metrics')
     sys.stdout.flush()
 
     if need_weights:
@@ -102,14 +102,14 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     degrees = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 1', stop - start
+    print('Parenclitic 1', stop - start)
     sys.stdout.flush()
         
     start = timeit.default_timer()
 
     shortest_paths = np.array(g.shortest_paths(weights = weights))
     shortest_paths = shortest_paths[(shortest_paths > 0) & (shortest_paths != np.inf)]
-    print 'here'
+    print('here')
     sys.stdout.flush()
 
     efficiency = 0
@@ -121,7 +121,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     shortest_paths = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 2', stop - start
+    print('Parenclitic 2', stop - start)
     sys.stdout.flush()
         
     start = timeit.default_timer()
@@ -136,7 +136,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     betweenness = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 3', stop - start
+    print('Parenclitic 3', stop - start)
     sys.stdout.flush()
         
     
@@ -152,7 +152,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     closeness = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 4', stop - start
+    print('Parenclitic 4', stop - start)
     sys.stdout.flush()
 
     start = timeit.default_timer()
@@ -167,7 +167,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     pagerank = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 5', stop - start
+    print('Parenclitic 5', stop - start)
     sys.stdout.flush()
         
     start = timeit.default_timer()
@@ -184,7 +184,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     eigenvector_centrality = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic centrality', stop - start
+    print('Parenclitic centrality', stop - start)
     sys.stdout.flush()
         
     start = timeit.default_timer()
@@ -197,16 +197,16 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     #Suppose symmetric matrix
     eigenvalues = np.real(eigenvalues)
     eigenvectors = np.real(eigenvectors)
-    print 'Eigenvectors', stop - start
+    print('Eigenvectors', stop - start)
     sys.stdout.flush()
 
     eigenvalues_intervals = np.diff(np.sort(eigenvalues)) 
-    print 'intervals', stop - start
+    print('intervals', stop - start)
     sys.stdout.flush()
 
     eigenvalues_intervals_normalized = eigenvalues_intervals / np.mean(eigenvalues_intervals)
 
-    print 'normalized', stop - start
+    print('normalized', stop - start)
     sys.stdout.flush()
     
     if get_big: 
@@ -215,7 +215,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
         parenclitic['eigenvalues_intervals_normalized'] = [np.array(eigenvalues_intervals_normalized)]
 
     stop = timeit.default_timer()
-    print 'Parenclitic: eigenvalues', stop - start
+    print('Parenclitic: eigenvalues', stop - start)
     sys.stdout.flush()
     
     IPR = np.sum(np.power(eigenvectors, 4), axis=0) / np.power(np.sum(np.power(eigenvectors, 2), axis=0), 2)
@@ -225,7 +225,7 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
     parenclitic['mean_IPR'] = np.mean(IPR)
 
     stop = timeit.default_timer()
-    print 'Parenclitic 7', stop - start
+    print('Parenclitic 7', stop - start)
     sys.stdout.flush()
 
     eigenvectors = None
@@ -249,19 +249,19 @@ def calculate_metrics(g, w, need_weights = True, get_big = True):
         weights = None
 
     stop = timeit.default_timer()
-    print 'Parenclitic 8', stop - start
+    print('Parenclitic 8', stop - start)
     sys.stdout.flush()
 
     start = timeit.default_timer()
 #    parenclitic['community_edge_betweenness_optimal'] = g.community_edge_betweenness().optimal_count
     stop = timeit.default_timer()
-    print 'Parenclitic 9', stop - start
+    print('Parenclitic 9', stop - start)
     sys.stdout.flush()
         
     start = timeit.default_timer()
     parenclitic['robustness'] = robustness(g, weights)
     stop = timeit.default_timer()
-    print 'Parenclitic 10', stop - start
+    print('Parenclitic 10', stop - start)
     sys.stdout.flush()
 
     return parenclitic
@@ -366,24 +366,24 @@ def parenclitic_feature_names():
 
 
 def parenclitic_transform(x = None, kdes = None, p = None, I = None, G = None, IDS = None, w = None, g = None, threshold_p = 0.5, min_x = 0, max_x = 1, graph_path = '', id_patient = -1, genes_names = []):
-    print 'parenclitic_transform'
+    print('parenclitic_transform')
     sys.stdout.flush()
     if g is None:
         if G is None:
             start = timeit.default_timer()
             w = make_weights(x, kdes, p, I, min_x, max_x)
             stop = timeit.default_timer()
-            print 'Time weights', stop - start
+            print('Time weights', stop - start)
         
             start = timeit.default_timer()
             g = make_graph(w > threshold_p, w)
             stop = timeit.default_timer()
-            print 'Make graph', stop - start
+            print('Make graph', stop - start)
         else:
             start = timeit.default_timer()
             g = graphs_aux.make_graph(G = G, weights = w, edges = IDS)
             stop = timeit.default_timer()
-            print 'Make graph', stop - start
+            print('Make graph', stop - start)
     sys.stdout.flush()
 
     '''
@@ -404,7 +404,7 @@ def parenclitic_transform(x = None, kdes = None, p = None, I = None, G = None, I
 def parenclitic_kdes(X, min_x = 0, max_x = 1):
     k = X.shape[1]
     kdes = np.empty((k, k), dtype=object)
-    print kdes.shape, X.shape
+    print(kdes.shape, X.shape)
     num_points = 10000
     p = np.zeros((k, k, num_points), dtype=np.float32)
     I = np.zeros((k, k, num_points + 1), dtype=np.float32)
@@ -423,7 +423,7 @@ def parenclitic_kdes(X, min_x = 0, max_x = 1):
             I[i, j] = np.concatenate([[0], np.cumsum(p[i, j])])
             kdes[i, j] = kde
         stop = timeit.default_timer()
-        print 'KDE for ', i, 'calculated in ', stop - start
+        print('KDE for ', i, 'calculated in ', stop - start)
         sys.stdout.flush()
 
     return kdes, p, I
@@ -507,7 +507,7 @@ def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, by_group = False, 
         threshold_p = [threshold_p]
 
     k = X.shape[1]
-    print 'parenclitic_graphs'
+    print('parenclitic_graphs')
     sys.stdout.flush()
 
     global num_done, num_pairs
@@ -529,7 +529,7 @@ def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, by_group = False, 
         G = np.zeros((num_pairs, num_bytes), dtype = np.uint8)
     else:
         G = np.zeros((len(threshold_p), num_pairs, num_bytes), dtype = np.uint8)
-    print 'G size:', G.nbytes, G.shape
+    print('G size:', G.nbytes, G.shape)
     
     need_parallel = num_workers > 1
     if need_parallel:
@@ -569,7 +569,7 @@ def parenclitic_graphs(mask, X, y, get_ids, min_score = 0.75, by_group = False, 
             num_done += 1
             if num_done % each_progress == 0 or num_done == num_pairs:
                 stop = timeit.default_timer()
-                print 'Graph for', num_done, 'pairs calculated in', stop - start
+                print('Graph for', num_done, 'pairs calculated in', stop - start)
                 sys.stdout.flush()
 
         if need_parallel:
@@ -613,7 +613,7 @@ def extract_graph(G, num_features, id_sample):
     return g
 
 def extract_graphs(G, num_features, num_samples):
-    print 'Extract graphs'
+    print('Extract graphs')
     sys.stdout.flush()    
     start = timeit.default_timer()
     num_bytes = len(np.packbits(np.zeros((num_features, 1),dtype = np.bool)))    
@@ -647,9 +647,9 @@ def extract_graphs(G, num_features, num_samples):
 
     assert (lid == G.shape[0])
     g = np.swapaxes(g, 0, 1)
-    print g.shape
+    print(g.shape)
     stop = timeit.default_timer()
-    print 'Graphs extracted in', stop - start
+    print('Graphs extracted in', stop - start)
     sys.stdout.flush()
     return g
 
@@ -683,7 +683,7 @@ def read_graphs(config, X, need_G = True, id_thr = None):
         lid = 0
     else:
         G = None
-    print 'Read graph'
+    print('Read graph')
     sys.stdout.flush()
     start = timeit.default_timer()
     D = []
@@ -692,8 +692,8 @@ def read_graphs(config, X, need_G = True, id_thr = None):
         cur, dcur, idscur = read_graphs_part(config, id_part, id_thr)
         
         stop = timeit.default_timer()
-        print 'Part', id_part, 'of graphs was read in', stop - start
-        print 'Part', id_part, 'of graphs consist of', len(dcur), 'edges'
+        print('Part', id_part, 'of graphs was read in', stop - start)
+        print('Part', id_part, 'of graphs consist of', len(dcur), 'edges')
         sys.stdout.flush()
         
         if need_G:
@@ -704,13 +704,13 @@ def read_graphs(config, X, need_G = True, id_thr = None):
         IDS.extend(idscur.tolist())
 
         stop = timeit.default_timer()
-        print 'Part', id_part, 'of graphs was added in', stop - start
+        print('Part', id_part, 'of graphs was added in', stop - start)
         sys.stdout.flush()
     
     if need_G:
-        print lid, G.shape[0]
+        print(lid, G.shape[0])
         assert (lid == G.shape[0])
     D = np.array(D).T
     IDS = np.array(IDS)
-    print D.shape, IDS.shape, IDS.dtype
+    print(D.shape, IDS.shape, IDS.dtype)
     return G, D, IDS

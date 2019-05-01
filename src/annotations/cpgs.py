@@ -32,7 +32,7 @@ class cpgs_annotation:
         if not crit_cols is None:
             self.crit_cols = crit_cols
         self.load(fname)
-        for crit_name, crit_col in self.crit_cols.iteritems():
+        for crit_name, crit_col in self.crit_cols.items():
             if not crit_col in self.df_cpgs:
                 raise ValueError(str(crit_col) + ' is not in DataFrame fname.')
         
@@ -75,7 +75,7 @@ class cpgs_annotation:
     # cpgs.get_crits_mask({'gene_out': ['TLR2', 'KLHL29'], 'chr_in': ['1','2','22']})
     def get_crits_mask(self, criterions = None):
         crit_all = None
-        for crit_name, crit_list in criterions.iteritems():
+        for crit_name, crit_list in criterions.items():
             if type(crit_list) is str or not hasattr(type(crit_list), '__iter__'):
                 crit_list = [crit_list]
             crit_col, crit_type = self.split_crit_name(crit_name)

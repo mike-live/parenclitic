@@ -1,4 +1,4 @@
-from transform_data import *
+from .transform_data import *
 
 def get_part(id_part, num_parts, num_features):
     cnt = num_features * (num_features - 1) / 2
@@ -54,7 +54,7 @@ def make_graphs_part(mask, X, y, threshold_p, id_part, num_parts, num_workers = 
     G = parenclitic_graphs(mask, X, y, get_ids, min_score, by_group, threshold_p, num_workers = num_workers, algo = algo)
     #skip_values = lambda i, j: (i >= j) or (be_part > i * X.shape[1] + j or i * X.shape[1] + j > en_part)
     stop = timeit.default_timer()
-    print 'Make graphs: ', stop - start 
+    print('Make graphs: ', stop - start) 
     sys.stdout.flush()
     return G
 

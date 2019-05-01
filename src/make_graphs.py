@@ -1,7 +1,7 @@
 import timeit
 import numpy as np
-from make_graphs_parts import *
-from infrastructure.configuration import param
+from .make_graphs_parts import *
+from .infrastructure.configuration import param
 
 #from configurations.load_data_age import load_data_age
 #from configurations.ages_config import config
@@ -28,8 +28,8 @@ from infrastructure.configuration import param
 #from configurations.load_data_age_GSE87571 import load_data_age_GSE87571_cpg_horvath
 #from configurations.config_age_GSE87571_cpg_horvath import config
 
-from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
-from configurations.config_age_GSE87571 import config
+from .configurations.load_data_age_GSE87571 import load_data_age_GSE87571
+from .configurations.config_age_GSE87571 import config
 
 #from configurations.load_data_cancer import load_data_cancer
 #from configurations.cancer_config import config

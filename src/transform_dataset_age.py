@@ -1,12 +1,12 @@
 from multiprocessing import Pool
 import timeit
 import numpy as np
-from transform_data import *
+from .transform_data import *
 from sklearn.model_selection import train_test_split
-from gen_files.genes_mean_and_std import generate_genes_mean_and_std
+from .gen_files.genes_mean_and_std import generate_genes_mean_and_std
 import os.path
 import sys
-from plot_kde import plot_parenclitic_kdes
+from .plot_kde import plot_parenclitic_kdes
 
 num_genes = 10
 threshold_p = 0.5
@@ -32,7 +32,7 @@ ranged_genes_file_name = 'pvals_mean_genes.txt'
 y_file_name = 'ages.txt'
 name_genes = 'anova'
 xp_file_name = 'parenclitic_features_' + name_genes + '_' + str(num_genes) + '_thr_p_' + "{:.1f}".format(threshold_p) + '.txt'
-print xp_file_name
+print(xp_file_name)
 
 #xp_file_name = 'parenclitic_features_RF.txt'
 
@@ -62,8 +62,8 @@ y = np.loadtxt(y_file_path, dtype='float32')
 ranged_genes = np.genfromtxt(ranged_genes_file_path, dtype='str', usecols = 0)
 
 stop = timeit.default_timer()
-print 'Data loaded: ', stop - start 
-print X.dtype, X.shape
+print('Data loaded: ', stop - start) 
+print(X.dtype, X.shape)
 
 sys.stdout.flush()
 
@@ -76,10 +76,10 @@ indices = np.array([genes_dict[x] for x in genes_names])
 
 X = X[indices, :].T
 
-print X.shape, num_genes
+print(X.shape, num_genes)
 
 median_age = np.median(y)
-print median_age
+print(median_age)
 min_age = np.min(y)
 max_age = np.max(y)
 
@@ -90,12 +90,12 @@ X_prob, _, y_prob, _ = train_test_split(
 
 start = timeit.default_timer()
 mask = y_prob < ages_edges[1]
-print mask.sum(), y_prob.shape, ages_edges[1]
+print(mask.sum(), y_prob.shape, ages_edges[1])
 sys.stdout.flush()
 #kdes, p, I = parenclitic_kdes(X_prob[mask, :]) # Not old
 G = parenclitic_graphs(X_prob, X, threshold_p)
 stop = timeit.default_timer()
-print 'Parenclitic kdes elapsed: ', stop - start 
+print('Parenclitic kdes elapsed: ', stop - start) 
 sys.stdout.flush()
 
 #plot_parenclitic_kdes(kde_path, X, y, mask, kdes, p, I, genes_names)
@@ -118,10 +118,10 @@ for i, x in enumerate(X):
 
 for i in range(results.shape[0]):
     Xp[i, :] = results[i].get()
-    print 'Results', i
+    print('Results', i)
 
-print(Xp[0, :])
+print((Xp[0, :]))
 stop = timeit.default_timer()
-print 'Parenclitic transform elapsed: ', stop - start 
+print('Parenclitic transform elapsed: ', stop - start) 
 
 np.savetxt(xp_file_path, Xp)

@@ -9,7 +9,7 @@ def get_graph_file(config, id_thr = 0, id_sample = 0):
     if "thr_p" in config.params:
         config.params["thr_p"].set_tick(id_thr)
     fname = config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])
-    print fname
+    print(fname)
     data = np.load(fname)
     return data
 
@@ -22,7 +22,7 @@ def make_graph(edges = None, weights = None, G = None, features_names = None, nu
         edges = edges[weights > 0]
         weights = weights[weights > 0]
         
-        g = igraph.Graph(n = num_vertices, edges = zip(*edges.T))
+        g = igraph.Graph(n = num_vertices, edges = list(zip(*edges.T)))
         g.es["weight"] = weights
     elif not G is None:
         if num_vertices is None:

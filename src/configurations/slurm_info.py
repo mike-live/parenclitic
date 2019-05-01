@@ -16,7 +16,7 @@ slurm_vars = \
 
 slurm_info = dict()
 
-for key, var in slurm_vars.iteritems():
+for key, var in slurm_vars.items():
     name = var[0]
     cur_type = var[1]
     if key in os.environ:
@@ -34,4 +34,4 @@ else:
     slurm_info['run_num'] = 1
 
 info = slurm_info
-print slurm_info
+print(slurm_info)

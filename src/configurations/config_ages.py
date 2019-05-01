@@ -1,5 +1,5 @@
 #from slurm_info import info
-from ws_info import info
+from .ws_info import info
 from configuration import configuration, param
 import collections
 from pathlib2 import Path

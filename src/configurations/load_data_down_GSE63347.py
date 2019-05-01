@@ -16,8 +16,8 @@ def load_data_down_GSE63347():
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     #X = np.random.rand(len(genes_names), 656)
@@ -39,7 +39,7 @@ def load_data_down_GSE63347():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_genes"].value
+    print(X.shape, config.params["num_genes"].value)
     sys.stdout.flush()
    
     mask = (y == 1)
@@ -54,8 +54,8 @@ def load_data_down_GSE63347_cpg_hannum():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -69,7 +69,7 @@ def load_data_down_GSE63347_cpg_hannum():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = (y == 1)
@@ -84,8 +84,8 @@ def load_data_down_GSE63347_cpg_horvath():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -99,7 +99,7 @@ def load_data_down_GSE63347_cpg_horvath():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = (y == 1)

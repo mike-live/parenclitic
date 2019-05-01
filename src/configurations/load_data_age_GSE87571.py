@@ -35,15 +35,15 @@ def load_data_age_GSE87571():
     config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     genes_names = genes_names[:config.params["num_genes"].value]
 
     y, mask, age = get_classes(config, X)
 
-    print X.shape, config.params["num_genes"].value
+    print(X.shape, config.params["num_genes"].value)
     sys.stdout.flush()
 
     return X, y, mask, genes_names, age
@@ -58,8 +58,8 @@ def load_data_age_GSE87571_cpgs():
     cpgs_names = data['cpgs_names']
     
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -71,7 +71,7 @@ def load_data_age_GSE87571_cpgs():
     _, indices, _ = np.intersect1d(cpgs_names, cpgs_names, return_indices = True)
     cpgs_names = cpgs_names[indices]
 
-    print indices, X.shape
+    print(indices, X.shape)
 
     X = X.T
     #cpgs_names = cpgs_names[indices]
@@ -80,7 +80,7 @@ def load_data_age_GSE87571_cpgs():
     good_cpgs = ~np.isnan(X).any(axis=0)
     X = X[:, good_cpgs]
     cpgs_names = cpgs_names[good_cpgs]
-    print X.shape
+    print(X.shape)
     
     y, mask, age = get_classes(config, X)
     
@@ -98,8 +98,8 @@ def load_data_age_GSE87571_cpg_horvath():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -114,7 +114,7 @@ def load_data_age_GSE87571_cpg_horvath():
 
     config.params["kde_mask"].value = "young_mask"
 
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     age = patients_info['age']

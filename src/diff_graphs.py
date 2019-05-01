@@ -11,11 +11,11 @@ def make_diff_graph_mongoloids(config):
     m_siblings_and = None
     m_mothers_or = None
     m_mothers_and = None
-    print diff_graph_path
+    print(diff_graph_path)
     for thr_p in config.params["thr_p"]:
         for id_sample in config.params["id_sample"]:
             #print id_sample, '/', config.params["id_sample"].num_ticks
-            print config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])
+            print(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]))
             data = np.load(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]))
             g = data['G']
             g = np.unpackbits(g, axis = 1)[:, :config.params["num_genes"].value].astype(np.bool)
@@ -62,12 +62,12 @@ def make_diff_graph_age(config, y):
     num_ages = len(config.params["ages_diff"].value)
     m_ages_or  = np.zeros((num_ages, num_genes, num_genes), dtype = np.bool)
     m_ages_and = np.ones ((num_ages, num_genes, num_genes), dtype = np.bool)
-    print diff_graph_path
+    print(diff_graph_path)
     #for thr_p in config.params["thr_p"]:
     config.params["thr_p"].set_tick(8);
     for id_sample in config.params["id_sample"]:
         #print id_sample, '/', config.params["id_sample"].num_ticks
-        print config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])
+        print(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]))
         data = np.load(config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"]))
         g = data['G']
         g = np.unpackbits(g, axis = 1)[:, :config.params["num_genes"].value].astype(np.bool)

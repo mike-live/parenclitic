@@ -16,8 +16,8 @@ def load_data_down_GSE74486():
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     #X = np.random.rand(len(genes_names), 656)
@@ -34,8 +34,8 @@ def load_data_down_GSE74486():
     import pandas as pd
     patients_info = pd.read_csv(config.ifname("patients_info"), delimiter=';')
     #patients_info = np.genfromtxt(config.ifname("patients_info"), dtype='str', usecols = 1, skip_header = 1, delimiter=';')
-    print patients_info["Age"]
-    print patients_info["Tissue"]
+    print(patients_info["Age"])
+    print(patients_info["Tissue"])
     good_mask = (patients_info["Tissue"] == "Brain") & (np.isnan(patients_info["Age"]))
     y[:] = 2
     y[(patients_info["disease"] == "Normal") & good_mask] = 1
@@ -46,8 +46,8 @@ def load_data_down_GSE74486():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_genes"].value
-    print y
+    print(X.shape, config.params["num_genes"].value)
+    print(y)
     sys.stdout.flush()
 
     mask = (y == 1)
@@ -62,8 +62,8 @@ def load_data_down_GSE63347_cpg_hannum():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -77,7 +77,7 @@ def load_data_down_GSE63347_cpg_hannum():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = (y == 1)
@@ -92,8 +92,8 @@ def load_data_down_GSE63347_cpg_horvath():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -107,7 +107,7 @@ def load_data_down_GSE63347_cpg_horvath():
 
     config.params["kde_mask"].value = "normal_mask"
 
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = (y == 1)

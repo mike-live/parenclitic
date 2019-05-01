@@ -17,8 +17,8 @@ def load_data_age():
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     #X = np.random.rand(len(genes_names), 656)
@@ -30,10 +30,10 @@ def load_data_age():
     X = X[indices, :].T
     #X = X.T
 
-    print X.shape, config.params["num_genes"].value
+    print(X.shape, config.params["num_genes"].value)
 
     median_age = np.median(y)
-    print median_age
+    print(median_age)
     min_age = np.min(y)
     max_age = np.max(y)
 

@@ -3,7 +3,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.pylab as pylab
 import numpy as np
-from transform_data import calc_edge_weight
+from .transform_data import calc_edge_weight
 
 def plot_kde(kde, p, I, threshold_p, mask, data, ages, x_label, y_label, x_min, x_max):
     x_min = np.min(data[0, :])
@@ -16,7 +16,7 @@ def plot_kde(kde, p, I, threshold_p, mask, data, ages, x_label, y_label, x_min, 
     ZI = np.zeros(X.shape[0] * X.shape[1])
 
     for i, pt in enumerate(positions.T):
-        print pt.shape
+        print(pt.shape)
         ZI[i] = calc_edge_weight(pt[0], pt[1], kde, p, I, x_min, x_max)
         if ZI[i] > threshold_p:
             ZI[i] = 1
@@ -65,7 +65,7 @@ def plot_parenclitic_kdes(kde_path, X, ages, mask, kdes, p, I, genes_names, thre
         for j in range(k):
             if (i == j): continue
             data = np.array([X[:, i], X[:, j]])
-            print data.shape
+            print(data.shape)
             kde = kdes[i, j]
             gene_i = genes_names[i]
             gene_j = genes_names[j]

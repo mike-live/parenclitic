@@ -1,5 +1,5 @@
 #from slurm_info import info
-from ws_info import info
+from .ws_info import info
 from infrastructure.configuration import configuration, param
 import collections
 import numpy as np

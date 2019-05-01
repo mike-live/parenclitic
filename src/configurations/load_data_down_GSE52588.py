@@ -36,8 +36,8 @@ def load_data_down_GSE52588():
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     #X = np.random.rand(len(genes_names), 656)
@@ -50,7 +50,7 @@ def load_data_down_GSE52588():
     #X = X.T
     y, mask = get_classes(config, X)
 
-    print X.shape, config.params["num_genes"].value
+    print(X.shape, config.params["num_genes"].value)
     sys.stdout.flush()
 
     return X, y, mask, genes_names
@@ -65,8 +65,8 @@ def load_data_down_GSE52588_cpgs():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     
@@ -74,24 +74,27 @@ def load_data_down_GSE52588_cpgs():
     cpgs_info = pd.read_csv(config.ifname("cpgs"), delimiter='\t')
     cpgs_island = cpgs_info["ID_REF"][cpgs_info["RELATION_TO_UCSC_CPG_ISLAND"] == "Island"]
     
+    cpgs_all = np.array(cpgs_info["ID_REF"])
+    
     cpgs_island = np.array(cpgs_island)
     cpgs_names = np.array(cpgs_names)
-    _, indices, _ = np.intersect1d(cpgs_names, cpgs_island, return_indices = True)
-
+    _, indices, _ = np.intersect1d(cpgs_names, cpgs_all, return_indices = True)
+    
     cpgs_names = cpgs_names[indices]
-    X = X[indices, :].T
+    X = X[indices, :]
+    X = X.T
     
     good_cpgs = ~np.isnan(X).any(axis=0)
     X = X[:, good_cpgs]
     cpgs_names = cpgs_names[good_cpgs]
-    print X.shape
+    print(X.shape)
     #X = X.T
     
     config.params["num_cpgs"].value = min(X.shape[1], config.params["num_cpgs"].value)
     y, mask = get_classes(config, X)
     #print y 
     #print mask
-    print X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape
+    print(X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape)
     sys.stdout.flush()
         
     return X, y, mask, cpgs_names
@@ -110,8 +113,8 @@ def load_data_mongoloids_cpgs():
     #ranged_genes = np.genfromtxt(config.ifname("ranged_genes"), dtype='str', usecols = 0)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
     #X = np.random.rand(len(genes_names), 656)
@@ -128,14 +131,14 @@ def load_data_mongoloids_cpgs():
     y[config.params["mongoloids_mask"].value] = 0
     y[config.params["siblings_mask"].value] = 1
     y[config.params["mothers_mask"].value] = 2
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = config.params[config.params["kde_mask"].value].value
     return X, y, X[mask, :], genes_names, cpgs_names
 
 def load_data_mongoloids_horvath_cpgs():
-    from config_mongoloids_cpg_horvath import config
+    from .config_mongoloids_cpg_horvath import config
     start = timeit.default_timer()
     X = np.genfromtxt(config.ifname("horvath_cpgs_beta"), dtype='float32', delimiter=' ')[:, 1:]
 
@@ -143,8 +146,8 @@ def load_data_mongoloids_horvath_cpgs():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -154,7 +157,7 @@ def load_data_mongoloids_horvath_cpgs():
     y[config.params["mongoloids_mask"].value] = 0
     y[config.params["siblings_mask"].value] = 1
     y[config.params["mothers_mask"].value] = 2
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = config.params[config.params["kde_mask"].value].value
@@ -169,8 +172,8 @@ def load_data_mongoloids_hannum_cpgs():
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
-    print 'Data loaded: ', stop - start
-    print X.dtype, X.shape
+    print('Data loaded: ', stop - start)
+    print(X.dtype, X.shape)
 
     sys.stdout.flush()
 
@@ -180,7 +183,7 @@ def load_data_mongoloids_hannum_cpgs():
     y[config.params["mongoloids_mask"].value] = 0
     y[config.params["siblings_mask"].value] = 1
     y[config.params["mothers_mask"].value] = 2
-    print X.shape, config.params["num_cpgs"].value
+    print(X.shape, config.params["num_cpgs"].value)
     sys.stdout.flush()
 
     mask = config.params[config.params["kde_mask"].value].value

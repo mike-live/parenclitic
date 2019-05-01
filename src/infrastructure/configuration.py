@@ -34,7 +34,7 @@ class param:
         self.id_tick = id_tick
         if id_tick >= self.num_ticks or id_tick < 0:
             raise IndexError
-        if isinstance(self.value_be, (np.floating, float, int, long)) and isinstance(self.value_en, (np.floating, float, int, long)):
+        if isinstance(self.value_be, (np.floating, float, int)) and isinstance(self.value_en, (np.floating, float, int)):
             if self.num_ticks > 1: self.value = (self.value_en - self.value_be) * id_tick / (self.num_ticks - 1) + self.value_be
             else: self.value = value_be
         elif self.value_list and hasattr(self.value_list, '__getitem__'):
@@ -45,14 +45,14 @@ class param:
         self.value = value
 
     def get_values(self):
-        values = map (self.set_tick, range(self.num_ticks))
+        values = list(map (self.set_tick, list(range(self.num_ticks))))
         return values
 
     def __iter__(self):
         self.id_tick = -1
         return self
 
-    def next(self):
+    def __next__(self):
         try:
             value = self.set_tick(self.id_tick + 1)
         except IndexError:
@@ -66,7 +66,7 @@ class param:
         return self.set_tick(id_tick)
 
 def set_params(params, id_tick):
-    for name, param in params.iteritems():
+    for name, param in params.items():
         if not param.is_const and not param.manual_ticks:
             param.set_tick(id_tick % param.num_ticks)
             id_tick /= param.num_ticks
@@ -95,7 +95,7 @@ class configuration:
         set_params(self.params, self.run_id)
 
     def get_joined_params(self, params_str = '', include_set = None, exclude_set = None, need_const = False, need_nonconst = False, delimiter = '_'):
-        for param_name, param in self.params.iteritems():
+        for param_name, param in self.params.items():
             need_param = ((param.is_const and need_const) or (not param.is_const and need_nonconst)) and param.is_path
             if include_set:
                 need_param &= param_name in include_set
@@ -126,7 +126,7 @@ class configuration:
         if type(names) is list:
             for name in names:
                 if type(name) is list:
-                    path /= delimiter.join(map(lambda xname: str(self.files.get(xname, xname)), name))
+                    path /= delimiter.join([str(self.files.get(xname, xname)) for xname in name])
                 else:
                     path /= self.files.get(name, name)
         else:
@@ -145,12 +145,12 @@ class configuration:
         
         section_name = 'Run information'
         config_struct.add_section(section_name)
-        for name, value in self.info.iteritems():
+        for name, value in self.info.items():
             config_struct.set(section_name, name, str(value))
 
         section_name = 'Parameters'
         config_struct.add_section(section_name)
-        for name, param in self.params.iteritems():
+        for name, param in self.params.items():
             if param.num_ticks > 1:
                 if param.value_list is None:
                     param_values = "linspace(" + str(param.value_be) + ", " + str(param.value_en) + ", " + str(param.num_ticks) + ")"
@@ -168,7 +168,7 @@ class configuration:
 
         section_name = 'Files'
         config_struct.add_section(section_name)
-        for name, fname in self.files.iteritems():
+        for name, fname in self.files.items():
             config_struct.set(section_name, name, str(fname))
         
         config_struct.write(Path(path).open("w"))
