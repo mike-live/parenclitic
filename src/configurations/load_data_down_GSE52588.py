@@ -61,7 +61,7 @@ def load_data_down_GSE52588_cpgs():
     import pandas as pd
     X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter='\t', skip_header = 1)[:, 1:]
 
-    cpgs_names  = np.genfromtxt(config.ifname("x"), dtype='str', usecols = 0)
+    cpgs_names  = np.genfromtxt(config.ifname("x"), dtype='str', skip_header = 1, usecols = 0)
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
