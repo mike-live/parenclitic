@@ -2,16 +2,16 @@ import numpy as np
 from multiprocessing.pool import Pool
 from threading import Event, Lock, Semaphore
 
-import collections
+#import collections
 import igraph
 import pandas as pd
 import timeit
-import graphs_aux
+#import graphs_aux
 from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 from sklearn import svm, datasets
 from scipy import stats
-from pathlib2 import Path
+#from pathlib2 import Path
 import os
 import sys
 
