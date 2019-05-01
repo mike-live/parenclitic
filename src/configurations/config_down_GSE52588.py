@@ -39,6 +39,7 @@ files = {
     "pair_genes": Path('pair_genes') / 'pair_genes',
     "kdes_dist": Path('kdes_dist') / 'kdes_dist',
     "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
+    "down_phenotypes": "down_phenotypes",
 }
 
 params_sets = {
@@ -54,6 +55,7 @@ params_sets = {
     "pair_genes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
     "kdes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
     "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'id_parenclitic']),
+    "down_phenotypes": set(['num_genes']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'down_syndrome', params_sets = params_sets)
