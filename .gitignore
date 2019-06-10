@@ -59,6 +59,6 @@ target/
 
 *.txt
 *.csv
-*.ipynb
+# *.ipynb
 .ipynb_checkpoints/
 *.bak
