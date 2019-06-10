@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='parenclitic',
-      version='0.1.1',
+      version='0.1.3',
       description='Parenclitic approach with kernels inside',
       url='https://github.com/mike-live/parenclitic',
       author='Mikhail Krivonosov',
@@ -13,7 +13,6 @@ setup(name='parenclitic',
           'python-igraph',
           'pandas',
           'sklearn',
-          'scipy',
-          'multiprocessing'
+          'scipy'
       ],
       zip_safe=False)
