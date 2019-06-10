@@ -50,7 +50,7 @@ class cpgs_annotation:
         if crit_type == 'in':
             crit_mask = self.df_cpgs_set[col].map(lambda x: is_intersect(x, crit_list))
             if nan:
-                crit_mask = crit_mask & self.df_cpgs_set[col].map(lambda x: (type(x) is float and math.isnan(x)))
+                crit_mask = crit_mask | self.df_cpgs_set[col].map(lambda x: (type(x) is float and math.isnan(x)))
         elif crit_type == 'ex' or crit_type == 'out':
             crit_mask = self.df_cpgs_set[col].map(lambda x: not (is_intersect(x, crit_list)))
             if nan:
@@ -75,18 +75,19 @@ class cpgs_annotation:
     # cpgs.get_crits_mask({'gene_out': ['TLR2', 'KLHL29'], 'chr_in': ['1','2','22']})
     def get_crits_mask(self, criterions = None):
         crit_all = None
-        for crit_name, crit_list in criterions.items():
-            if type(crit_list) is str or not hasattr(type(crit_list), '__iter__'):
-                crit_list = [crit_list]
-            crit_col, crit_type = self.split_crit_name(crit_name)
-            if crit_col in self.crit_cols and crit_type in self.crit_types:
-                crit_mask = self.get_crit_mask(crit_col, crit_type, crit_list)
-                if crit_all is None:
-                    crit_all = crit_mask
-                else:
-                    crit_all = crit_all & crit_mask    
+        if not criterions is None:
+            for crit_name, crit_list in criterions.items():
+                if type(crit_list) is str or not hasattr(type(crit_list), '__iter__'):
+                    crit_list = [crit_list]
+                crit_col, crit_type = self.split_crit_name(crit_name)
+                if crit_col in self.crit_cols and crit_type in self.crit_types:
+                    crit_mask = self.get_crit_mask(crit_col, crit_type, crit_list)
+                    if crit_all is None:
+                        crit_all = crit_mask
+                    else:
+                        crit_all = crit_all & crit_mask    
         if crit_all is None:
-            crit_all = np.ones((len(self.df_cpgs_set),))
+            crit_all = np.ones((len(self.df_cpgs_set),), dtype = np.bool)
         return crit_all
         
     # cur = cpgs.get_sub_frame({'chr_in': ['22'], 'geotype_ex': ['Island']})
@@ -99,3 +100,10 @@ class cpgs_annotation:
         cpgs = self.df_cpgs[self.crit_cols['cpgs']][self.get_crits_mask(criterions)]
         return cpgs.values, cpgs.index.values
     
+    def get_crit_col_values(self, crit_col, criterions = None, original = False):
+        df = self.get_sub_frame(criterions = criterions, original = original)
+        values = list(df[self.crit_cols[crit_col]])
+        values = list(map(lambda x: x if type(x) is list else (list(x) if type(x) is set else [x]), values))
+        values = [y for x in values for y in x]
+        print(values[:10])
+        return list(set(values))
