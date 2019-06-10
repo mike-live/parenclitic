@@ -8,7 +8,7 @@ def get_graph_file(config, id_thr = 0, id_sample = 0):
     config.params["id_sample"].set_tick(id_sample)
     if "thr_p" in config.params:
         config.params["thr_p"].set_tick(id_thr)
-    fname = config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])
+    fname = config.ofname(["graphs", "g"], ext = '.npz', include_set = config.params_sets["graph"])
     print(fname)
     data = np.load(fname)
     return data
@@ -46,6 +46,17 @@ def load_graph(config, features_names = None, num_vertices = None, id_thr = 0, i
         g = make_graph(G = data['G'], features_names = features_names, num_vertices = num_vertices)
     return g
 
+def save_graph_as_csv(config, features_names = None, num_vertices = None, id_thr = 0, id_sample = 0):
+    g = load_graph(config, id_thr, id_sample)
+    fname = config.ofname(["graphs", "g"], ext = '.csv', include_set = config.params_sets["graph"])
+    edges = np.array([e.tuple for e in g.es])
+    weights = g.es["weight"]
+    df = pd.DataFrame()
+    df["weights"] = weights
+    df["v1"] = edges[:, 0]
+    df["v2"] = edges[:, 1]
+    df.to_csv(fname, sep = '\t')
+    
 def graph_to_crs(g):
     if g.ecount() > g.vcount() * g.vcount() / 10:
         m = np.array(g.get_adjacency().data).astype('int8')

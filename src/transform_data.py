@@ -15,7 +15,7 @@ import scipy.integrate as integrate
 import numpy as np
 import pandas as pd
 import timeit
-from . import graphs_aux
+import graphs_aux
 from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 
@@ -339,6 +339,7 @@ def parenclitic_feature_names():
     feature_names['std_pagerank'] = 'Std pagerank'
     
     feature_names['eigenvalues'] = 'Eigenvalues'
+    feature_names['eigenvector_centrality'] = 'Eigenvector centrality'
     feature_names['min_eigenvector_centrality'] = 'Min eigenvector centrality'
     feature_names['max_eigenvector_centrality'] = 'Max eigenvector centrality'
     feature_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'

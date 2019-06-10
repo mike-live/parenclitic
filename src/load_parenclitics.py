@@ -6,7 +6,7 @@ def load_parenclitics(config, by_sample = False, id_thr = 0):
             config.params["thr_p"].set_tick(id_thr)
 
         parenclitics = None
-        for id_sample in config.params["id_sample"]:    
+        for id_sample in config.params["id_sample"]:
             parenclitic = None
             pkl_file = config.ofname(["parenclitic"], ext = ".pkl", include_set = config.params_sets["parenclitic_sample"])
             if os.path.exists(pkl_file):
