@@ -94,21 +94,27 @@ class configuration:
     def upd_ticks(self):
         set_params(self.params, self.run_id)
 
+    def make_str(self, x):        
+        if type(x) is float:
+            return "{:g}".format(x)
+        else:
+            return str(x)
+            
     def get_joined_params(self, params_str = '', include_set = None, exclude_set = None, need_const = False, need_nonconst = False, delimiter = '_'):
         for param_name, param in self.params.items():
             need_param = ((param.is_const and need_const) or (not param.is_const and need_nonconst)) and param.is_path
-            if include_set:
+            if not include_set is None:
                 need_param &= param_name in include_set
-            if exclude_set:
+            if not exclude_set is None:
                 need_param &= param_name not in exclude_set
             #print param_name, need_param, param.is_const, param.is_path, need_const, need_nonconst
             if need_param:
-                if isinstance(params_str, Path):
-                    params_str /= param_name + delimiter + str(param.value)
+                if isinstance(params_str, Path):    
+                    params_str /= param_name + delimiter + self.make_str(param.value)
                 else:
                     if params_str:
                         params_str += delimiter
-                    params_str += param_name + delimiter + str(param.value)
+                    params_str += param_name + delimiter + self.make_str(param.value)
         #print need_nonconst, params_str
         return params_str
 
@@ -116,7 +122,10 @@ class configuration:
         dir_name = self.get_joined_params(Path(), include_set, exclude_set, need_const = need_const, delimiter = delimiter)
         name = Path(name)
         name = name.with_name(self.get_joined_params(name.stem, include_set, exclude_set, need_nonconst = need_nonconst, delimiter = delimiter) + name.suffix)
-        path_const_params = self.data_path / 'params' / dir_name / name
+        if dir_name == Path():
+            path_const_params = self.data_path / name
+        else:
+            path_const_params = self.data_path / 'params' / dir_name / name
         if not path_const_params.parent.exists():
             path_const_params.parent.mkdir(parents = True, exist_ok = True)
         return path_const_params
