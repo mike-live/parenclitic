@@ -32,7 +32,7 @@ class graph_partition:
         self.fit(0)
     
     def fit(self, num_vertices):
-        cnt = num_vertices * (num_vertices - 1) / 2
+        cnt = num_vertices * (num_vertices - 1) // 2
         lens = np.tile(cnt // self.num_parts, (self.num_parts, 1))
         lens[:(cnt % self.num_parts)] += 1
         clens = np.concatenate([[0], np.cumsum(lens)])
@@ -65,6 +65,45 @@ class graph_partition:
     def __len__(self):
         return self.length
 
+class graph_partition_subset:
+    def __init__(self, id_part = 0, num_parts = 1, paths = None, work_dir = ''):
+        self.id_part = id_part
+        self.num_parts = num_parts
+        if paths is None:
+            paths = [''] * num_parts
+            for i in range(num_parts):
+                paths[i] = 'graph_id_part_' + str(i) + '.npz'
+        else:
+            assert(len(paths) == num_parts)
+        for i in range(num_parts):
+            paths[i] = os.path.join(work_dir, paths[i])
+        self.paths = paths
+        self.path = paths[id_part]
+        self.fit(np.array([]))
+    
+    def fit(self, subset):
+        cnt = subset.shape[0]
+        lens = np.tile(cnt // self.num_parts, (self.num_parts, 1))
+        lens[:(cnt % self.num_parts)] += 1
+        clens = np.concatenate([[0], np.cumsum(lens)])
+        self.be = clens[self.id_part]
+        self.en = clens[self.id_part + 1] - 1
+        self.subset = subset;
+        self.length = int(np.asscalar(lens[self.id_part]))
+        return self
+
+    def get_path(self):
+        return self.partition_path
+
+    def get_paths(self):
+        return self.partition_paths
+        
+    def __iter__(self):
+        for cur, pair in enumerate(self.subset[self.be:self.en]):
+            yield pair[0], pair[1]
+    
+    def __len__(self):
+        return self.length
 
 class classifier_kernel:
     def __init__(self, distance_threshold = 0, min_score = 0.75, by_group = False, dtype = np.float32, \
@@ -155,13 +194,15 @@ class pdf_kernel:
         self.D = np.array(p, dtype = self.dtype)
         return self
 
-    def get_edges(self, thr_p):
+    def get_edges(self, thr_p = None):
+        if thr_p is None:
+            thr_p = self.thr_p
         ind = int(thr_p * self.num_points)
         if ind < len(self.pr):
             q = self.pr[ind]
             self.G = self.p < q
         else:
-            self.G = np.ones((X_i.shape[0]), dtype=np.bool)
+            self.G = np.ones((len(self.p)), dtype=np.bool)
         return self.G, self.D
 
 
@@ -182,7 +223,7 @@ class parenclitic:
         self.verbose = verbose
         #self.max_edges = max_edges
 
-    def fit(self, X, y, mask, num_workers = 1, queue_len = 10):
+    def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 10):
         """Fit the model according to the given training data.
         Parameters
         ----------
@@ -209,10 +250,13 @@ class parenclitic:
         self.num_features = self.X_shape[1]
 
         if self.verbose == 1:
-            print 'parenclitic_graphs'
+            print('parenclitic_graphs')
             sys.stdout.flush()
 
-        self.partition.fit(self.num_features)
+        if subset is None:
+            self.partition.fit(self.num_features)
+        else:
+            self.partition.fit(subset)
         
         global num_done, num_pairs
         num_done = 0
@@ -246,7 +290,7 @@ class parenclitic:
                 if num_done % each_progress == 0 or num_done == num_pairs:
                     stop = timeit.default_timer()
                     if self.verbose == 1:
-                        print 'Graph for', num_done, 'pairs calculated in', stop - start
+                        print('Graph for', num_done, 'pairs calculated in', stop - start)
                         sys.stdout.flush()
 
             if need_parallel:
@@ -264,9 +308,14 @@ class parenclitic:
     
         if self.verbose == 1:
             sys.stdout.flush()
-        self.M = np.array(M).T
-        self.D = np.array(D).T
-        self.E = np.array(E)
+        if M == []:
+            self.M = np.zeros((self.num_samples, 0), dtype = np.bool)
+            self.D = np.zeros((self.num_samples, 0), dtype = np.float32)
+            self.E = np.zeros((2, 0), dtype = np.float32)
+        else:    
+            self.M = np.array(M).T
+            self.D = np.array(D).T
+            self.E = np.array(E)
         self.is_fitted = True
         return self
         
@@ -303,7 +352,7 @@ class parenclitic:
         edges = edges[mask, :]
         weights = weights[mask]
         
-        g = igraph.Graph(n = num_features, edges = zip(*edges.T))
+        g = igraph.Graph(n = num_features, edges = list(zip(*edges.T)))
         g.es["weight"] = weights
             
         if not features_names is None:
@@ -408,7 +457,12 @@ class parenclitic:
                 
     def calculate_metrics(self, g, need_weights = True, get_big = True):
         if self.verbose == 1:
-            print 'Metrics'
+            print('Metrics')
+            print(g.ecount(), g.vcount())
+            weight = np.array(g.es["weight"])
+            print(np.any(np.isnan(weight)))
+            print(g)
+            print([np.array(x.tuple) for x in g.es])
             sys.stdout.flush()
 
         if need_weights:
@@ -433,18 +487,32 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 1', stop - start
+            print('Parenclitic 1', stop - start)
             sys.stdout.flush()
             
         start = timeit.default_timer()
 
+        if self.verbose == 1:
+            print('here1')
+            sys.stdout.flush()
+
         shortest_paths = np.array(g.shortest_paths(weights = weights))
+        if self.verbose == 1:
+            print('here2')
+            sys.stdout.flush()
+
         shortest_paths = shortest_paths[(shortest_paths > 0) & (shortest_paths != np.inf)]
-        sys.stdout.flush()
+        if self.verbose == 1:
+            print('here3')
+            sys.stdout.flush()
 
         efficiency = 0
         if len(shortest_paths) > 0:
             efficiency = (1.0 / shortest_paths).sum() / (g.vcount() * (g.vcount() - 1))
+        if self.verbose == 1:
+            print('here4')
+            sys.stdout.flush()
+
         # In paper Latora V., Marchiori M.: Efficient behavior of small-world networks. Phys. Rev. Lett. 87 (Article No. 198701) (2001)
         # suggested to normalize by efficiency for threshold_p = 0 (cause graph has all edges when thr_p = 0)
         parenclitic['efficiency'] = efficiency
@@ -452,12 +520,21 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 2', stop - start
+            print('Parenclitic 2', stop - start)
             sys.stdout.flush()
             
         start = timeit.default_timer()
+        if self.verbose == 1:
+            print('here5')
+            sys.stdout.flush()
 
         betweenness = g.betweenness(weights = weights)
+        #betweenness = np.array([0, 0])
+        if self.verbose == 1:
+            print('here6')
+            print(betweenness)
+            sys.stdout.flush()
+
         if get_big: 
             parenclitic['betweenness'] = [np.array(betweenness)]
         parenclitic['min_betweenness'] = np.min (betweenness)
@@ -466,9 +543,14 @@ class parenclitic:
         parenclitic['std_betweenness'] = np.std (betweenness)
         betweenness = None
 
+        if self.verbose == 1:
+            print('here7')
+            sys.stdout.flush()
+        
+        
         stop = timeit.default_timer()
         if self.verbose == 1:        
-            print 'Parenclitic 3', stop - start
+            print('Parenclitic 3', stop - start)
             sys.stdout.flush()
             
         
@@ -485,7 +567,7 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 4', stop - start
+            print('Parenclitic 4', stop - start)
             sys.stdout.flush()
 
         start = timeit.default_timer()
@@ -501,7 +583,7 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 5', stop - start
+            print('Parenclitic 5', stop - start)
             sys.stdout.flush()
             
         start = timeit.default_timer()
@@ -519,7 +601,7 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic centrality', stop - start
+            print('Parenclitic centrality', stop - start)
             sys.stdout.flush()
             
         start = timeit.default_timer()
@@ -533,18 +615,18 @@ class parenclitic:
         eigenvalues = np.real(eigenvalues)
         eigenvectors = np.real(eigenvectors)
         if self.verbose == 1:
-            print 'Eigenvectors', stop - start
+            print('Eigenvectors', stop - start)
             sys.stdout.flush()
 
         eigenvalues_intervals = np.diff(np.sort(eigenvalues)) 
         if self.verbose == 1:
-            print 'intervals', stop - start
+            print('intervals', stop - start)
             sys.stdout.flush()
 
         eigenvalues_intervals_normalized = eigenvalues_intervals / np.mean(eigenvalues_intervals)
 
         if self.verbose == 1:
-            print 'normalized', stop - start
+            print('normalized', stop - start)
             sys.stdout.flush()
         
         if get_big: 
@@ -554,7 +636,7 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic: eigenvalues', stop - start
+            print('Parenclitic: eigenvalues', stop - start)
             sys.stdout.flush()
         
         IPR = np.sum(np.power(eigenvectors, 4), axis=0) / np.power(np.sum(np.power(eigenvectors, 2), axis=0), 2)
@@ -565,7 +647,7 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 7', stop - start
+            print('Parenclitic 7', stop - start)
             sys.stdout.flush()
 
         eigenvectors = None
@@ -590,21 +672,21 @@ class parenclitic:
 
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 8', stop - start
+            print('Parenclitic 8', stop - start)
             sys.stdout.flush()
 
         start = timeit.default_timer()
     #    parenclitic['community_edge_betweenness_optimal'] = g.community_edge_betweenness().optimal_count
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 9', stop - start
+            print('Parenclitic 9', stop - start)
             sys.stdout.flush()
             
         start = timeit.default_timer()
         parenclitic['robustness'] = self.robustness(g, weights)
         stop = timeit.default_timer()
         if self.verbose == 1:
-            print 'Parenclitic 10', stop - start
+            print('Parenclitic 10', stop - start)
             sys.stdout.flush()
 
         return parenclitic
