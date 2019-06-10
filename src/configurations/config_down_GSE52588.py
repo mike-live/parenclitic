@@ -25,6 +25,7 @@ files = {
     "x": 'gene_mean_islands_shores.txt',
     "horvath_cpgs_beta": "horvath_cpgs_beta.txt",
     "name_genes": 'linreg_genes_mean_islands_shores',
+    "good_pairs": "good_pairs.npz",
     #"ranged_genes": 'linreg_genes_mean_islands_shores.txt',
     "g": 'graph',
     "kdes": Path('kdes') / 'kdes',

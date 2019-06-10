@@ -7,6 +7,7 @@ from pathlib2 import Path
 
 params = collections.OrderedDict([
     ("num_cpgs", param(150254, name = 'num_cpgs')), # 150254
+    ("normalization", param('nf', name = 'normalization')), # 150254
     ("kde_mask", param('healthy_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
     ("geotypes", param(['Island'], name = 'geotypes')),
@@ -23,9 +24,17 @@ params = collections.OrderedDict([
 
 files = {
     "gene_chromosome": 'gene_chr.txt',
-    "x": 'average_beta.txt',
-    "cpgs": "cpgs_annotations.txt",
+    #"x": 'average_beta.txt',
+    "x": 'GSE52588_beta_nf.txt',
+    "beta_values": 'GSE52588_beta_nf.npz',
+    "cpgs_annotations": "cpgs_annotations.txt",
+    "patients_info": "GSE52588_samples.txt",
+    "cells": "cells.tsv",
+    "epimutations": "epimutations.txt",
+    "down_related_2015_cpgs": "down_related_2015_cpgs.txt",
+    "var_diff_pv": "var_diff_pv.npz",
     "g": 'graph',
+    "bad_cpgs": "bad_cpgs.txt",
     "kdes": Path('kdes') / 'kdes',
     "graphs": 'graphs',
     "degrees": Path('degrees') / 'degrees',
@@ -39,6 +48,8 @@ files = {
     "kdes_dist": Path('kdes_dist') / 'kdes_dist',
     "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
     "down_phenotypes": "down_phenotypes",
+    "down_epimutations": "down_epimutations",
+    "age_related": "age_related",
 }
 
 params_sets = {
@@ -54,7 +65,9 @@ params_sets = {
     "pair_genes": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
     "kdes": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
     "parenclitic_boxplot": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_parenclitic']),
-    "down_phenotypes": set(['num_cpgs']),
+    "down_phenotypes": set(['normalization', 'num_cpgs']),
+    "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm']),
+    "age_related": set([]),
 }
 
 config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'down_syndrome_cpgs', params_sets = params_sets)

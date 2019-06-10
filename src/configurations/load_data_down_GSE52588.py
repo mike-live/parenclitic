@@ -26,6 +26,7 @@ def get_classes(config, X):
 def load_data_down_GSE52588():
     from configurations.config_down_GSE52588 import config
     start = timeit.default_timer()
+    print(config.ifname("x"))
     X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter=' ')[:, 1:]
 
     genes_names = np.genfromtxt(config.ifname("x"), dtype='str', usecols = 0)
@@ -71,7 +72,7 @@ def load_data_down_GSE52588_cpgs():
     sys.stdout.flush()
     
     import pandas as pd
-    cpgs_info = pd.read_csv(config.ifname("cpgs"), delimiter='\t')
+    cpgs_info = pd.read_csv(config.ifname("cpgs_annotations"), delimiter='\t')
     cpgs_island = cpgs_info["ID_REF"][cpgs_info["RELATION_TO_UCSC_CPG_ISLAND"] == "Island"]
     
     cpgs_all = np.array(cpgs_info["ID_REF"])
