@@ -22,7 +22,8 @@ params = collections.OrderedDict([
 
 files = {
     "gene_chromosome": 'gene_chr.txt',
-    "x": 'gene_mean_islands_shores.txt',
+    #"x": 'gene_mean_islands_shores.txt',
+    "x": 'GSE52588_average_beta.txt',
     "horvath_cpgs_beta": "horvath_cpgs_beta.txt",
     "name_genes": 'linreg_genes_mean_islands_shores',
     "good_pairs": "good_pairs.npz",
