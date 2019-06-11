@@ -88,7 +88,7 @@ class graph_partition_subset:
         clens = np.concatenate([[0], np.cumsum(lens)])
         self.be = clens[self.id_part]
         self.en = clens[self.id_part + 1] - 1
-        self.subset = subset;
+        self.subset = subset
         self.length = int(np.asscalar(lens[self.id_part]))
         return self
 
@@ -99,7 +99,7 @@ class graph_partition_subset:
         return self.partition_paths
         
     def __iter__(self):
-        for cur, pair in enumerate(self.subset[self.be:self.en]):
+        for cur, pair in enumerate(self.subset[self.be:self.en + 1]):
             yield pair[0], pair[1]
     
     def __len__(self):
