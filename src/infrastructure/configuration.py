@@ -82,7 +82,7 @@ class configuration:
         self.run_num = info['run_num']
         self.project_path = info['work_dir']
         for parent in Path(info['work_dir']).parents:
-            if parent.stem in set(["Projects", "Scientific"]):
+            if parent.stem in set(["Projects", "Scientific", "Science"]):
                 self.project_path = parent / project_name
                 break
         self.upd_ticks()
