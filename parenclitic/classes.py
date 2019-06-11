@@ -375,36 +375,44 @@ class parenclitic:
             self.graphs[id_sample] = self.make_graph(E, D, M, self.num_features, features_names = features_names)
         return self.graphs[id_sample]
 
-    def make_paths(paths, num_paths, work_dir, pref, suf):
+    def make_paths(self, paths, num_paths, work_dir, pref, suf):
         if paths is None:
             paths = [''] * self.num_samples
             for i in range(self.num_samples):
                 paths[i] = pref + str(i) + suf
         assert(len(paths) == num_paths)
         
-        for i in range(paths):
+        for i in range(len(paths)):
             paths[i] = os.path.join(work_dir, paths[i])
         return paths
 
     
     def set_graph_paths(self, paths = None, work_dir = 'graphs'):
-        self.graph_paths = make_paths(paths, num_samples, work_dir, 'graph_id_sample_', '.npz')
+        self.graph_paths = self.make_paths(paths, self.num_samples, work_dir, 'graph_id_sample_', '.npz')
 
     def set_parenclitic_paths(self, paths = None, work_dir = 'parenclitics'):
-        self.parenclitic_paths = make_paths(paths, num_samples, work_dir, 'parenclitic_id_sample_', '.pkl')
+        self.parenclitic_paths = self.make_paths(paths, self.num_samples, work_dir, 'parenclitic_id_sample_', '.pkl')
         
     def get_graph_paths(self):
         return self.graph_paths        
 
     def get_parenclitic_paths(self):
         return self.parenclitic_paths
-        
-    def save_graphs(self):
+
+    # gtype : npz, csv
+    def save_graphs(self, gtype = 'npz'):
         if self.graph_paths is None:
             self.set_graph_paths()
         for i, graph_path in enumerate(self.graph_paths):
-            np.savez_compressed(graph_path, M = self.M[i, :], D = self.D[i, :], E = self.E, \
-                                num_samples = self.num_samples, num_features = self.num_features)
+            M = self.M[i, :].flatten()
+            D = self.D[i, :].flatten()
+            E = self.E
+            if gtype == 'npz':
+                np.savez_compressed(graph_path, M = M, D = D, E = E, \
+                                    num_samples = self.num_samples, num_features = self.num_features)
+            elif gtype == 'csv':
+                df = pd.DataFrame({'v0': E[:, 0], 'v1': E[:, 1], 'distance': D, 'is_linked': M.astype(np.int32)})
+                df.to_csv(graph_path, sep = '\t', index = None)
 
     def load_graph(self, id_sample = 0):
         graph_path = self.graph_paths[id_sample]
