@@ -295,7 +295,7 @@ class parenclitic:
 
             if need_parallel:
                 ready.acquire()
-                pool.apply_async(self.kernel.fit, args = (self.kernel, X[:, i], X[:, j], y, mask), callback = upd_graph)
+                pool.apply_async(self.kernel.fit, args = (X[:, i], X[:, j], y, mask), callback = upd_graph)
             else:
                 upd_graph(self.kernel.fit(X[:, i], X[:, j], y, mask))
 
