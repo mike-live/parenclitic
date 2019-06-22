@@ -208,7 +208,7 @@ class pdf_kernel:
 
 
 class parenclitic:
-    def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), verbose = 0):
+    def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), verbose = 0, progress_bar = 1):
         self.partition = partition
         self.kernel = kernel
         
@@ -221,6 +221,7 @@ class parenclitic:
         self.graphs = None
         self.parenclitics = None
         self.verbose = verbose
+        self.progress_bar = progress_bar
         #self.max_edges = max_edges
 
     def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 10):
@@ -261,7 +262,10 @@ class parenclitic:
         global num_done, num_pairs
         num_done = 0
         num_pairs = len(self.partition)
-            
+        each_progress = int(np.sqrt(num_pairs + 0.5))            
+        if self.progress_bar:
+            from tqdm import tqdm
+            progress_bar = tqdm(total = num_pairs)
         M, D, E = [], [], []
         
         need_parallel = num_workers > 1
@@ -270,9 +274,8 @@ class parenclitic:
             global done_tasks, ready
             done_tasks = 0
             ready = Semaphore(num_workers * queue_len)
-
         start = timeit.default_timer()
-        each_progress = int(np.sqrt(num_pairs + 0.5))
+
         for i, j in self.partition:
             def upd_graph(kernel, i = i, j = j):
                 global num_done, done_tasks, ready
@@ -287,6 +290,8 @@ class parenclitic:
                     ready.release()
 
                 num_done += 1
+                if self.progress_bar:
+                    progress_bar.update()
                 if num_done % each_progress == 0 or num_done == num_pairs:
                     stop = timeit.default_timer()
                     if self.verbose == 1:
@@ -308,6 +313,8 @@ class parenclitic:
     
         if self.verbose == 1:
             sys.stdout.flush()
+        if self.progress_bar:
+            progress_bar.close()
         if M == []:
             self.M = np.zeros((self.num_samples, 0), dtype = np.bool)
             self.D = np.zeros((self.num_samples, 0), dtype = np.float32)
