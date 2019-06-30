@@ -192,11 +192,16 @@ class pdf_kernel:
         self.pr = pr
         self.p = p
         self.D = np.array(p, dtype = self.dtype)
+        for i, cur_p in enumerate(p):
+            pos = np.searchsorted(pr, cur_p)
+            self.D[i] = float(self.num_points - pos) / self.num_points
+           
         return self
 
     def get_edges(self, thr_p = None):
         if thr_p is None:
             thr_p = self.thr_p
+        thr_p = 1 - thr_p
         ind = int(thr_p * self.num_points)
         if ind < len(self.pr):
             q = self.pr[ind]
