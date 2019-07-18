@@ -34,9 +34,12 @@ class param:
         self.id_tick = id_tick
         if id_tick >= self.num_ticks or id_tick < 0:
             raise IndexError
-        if isinstance(self.value_be, (np.floating, float, int)) and isinstance(self.value_en, (np.floating, float, int)):
+        if isinstance(self.value_be, (np.floating, float)) and isinstance(self.value_en, (np.floating, float)):
             if self.num_ticks > 1: self.value = (self.value_en - self.value_be) * id_tick / (self.num_ticks - 1) + self.value_be
             else: self.value = value_be
+        elif isinstance(self.value_be, (int)) and isinstance(self.value_en, (int)):
+            if self.num_ticks > 1: self.value = (self.value_en - self.value_be) * id_tick // (self.num_ticks - 1) + self.value_be
+            else: self.value = value_be        
         elif self.value_list and hasattr(self.value_list, '__getitem__'):
             self.value = self.value_list[id_tick]
         return self.value
