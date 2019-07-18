@@ -43,10 +43,10 @@ class graph_partition:
         return self
 
     def get_path(self):
-        return self.partition_path
+        return self.path
 
     def get_paths(self):
-        return self.partition_paths
+        return self.paths
         
     def __iter__(self):
         cur = 0
@@ -93,10 +93,10 @@ class graph_partition_subset:
         return self
 
     def get_path(self):
-        return self.partition_path
+        return self.path
 
     def get_paths(self):
-        return self.partition_paths
+        return self.paths
         
     def __iter__(self):
         for cur, pair in enumerate(self.subset[self.be:self.en + 1]):
@@ -342,6 +342,8 @@ class parenclitic:
         if self.partition.num_parts > 1 or not self.is_fitted:
             E, D, IDS = [], [], []
             for part_path in self.partition.get_paths():
+                if not os.path.exists(part_path):
+                    return
                 data = np.load(part_path)
                 mcur, dcur, ecur = data['M'], data['D'], data['E']
                 num_samples, num_features = data['num_samples'], data['num_features']
@@ -398,6 +400,8 @@ class parenclitic:
             paths[i] = os.path.join(work_dir, paths[i])
         return paths
 
+    def set_num_samples(self, num_samples):
+        self.num_samples = num_samples;
     
     def set_graph_paths(self, paths = None, work_dir = 'graphs'):
         self.graph_paths = self.make_paths(paths, self.num_samples, work_dir, 'graph_id_sample_', '.npz')
@@ -430,7 +434,7 @@ class parenclitic:
         graph_path = self.graph_paths[id_sample]
         data = np.load(graph_path)
         M, D, E = data['M'], data['D'], data['E']
-        num_samples, num_features = data['num_samples'], data['num_features']
+        num_samples, num_features = data['num_samples'].item(0), data['num_features'].item(0)
         return M, D, E, num_samples, num_features
             
     def get_graphs(self, features_names = None):
@@ -744,6 +748,7 @@ class parenclitic:
         metric_names['max_eigenvector_centrality'] = 'Max eigenvector centrality'
         metric_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'
         metric_names['std_eigenvector_centrality'] = 'Std eigenvector centrality'
+        metric_names['eigenvector_centrality'] = 'Eigenvector centrality'
         metric_names['num_edges'] = 'Number of edges'
 
         metric_names['eigenvalues_intervals'] = 'Eigenvalues intervals'
