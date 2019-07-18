@@ -3,6 +3,7 @@ import igraph
 import scipy
 import struct
 import array
+import pandas as pd
 
 def get_graph_file(config, id_thr = 0, id_sample = 0):
     config.params["id_sample"].set_tick(id_sample)
@@ -49,13 +50,21 @@ def load_graph(config, features_names = None, num_vertices = None, id_thr = 0, i
 def save_graph_as_csv(config, features_names = None, num_vertices = None, id_thr = 0, id_sample = 0):
     g = load_graph(config, id_thr, id_sample)
     fname = config.ofname(["graphs", "g"], ext = '.csv', include_set = config.params_sets["graph"])
+    graph_to_csv(g).to_csv(fname, sep = '\t')
+
+def graph_to_csv(g):
     edges = np.array([e.tuple for e in g.es])
-    weights = g.es["weight"]
     df = pd.DataFrame()
-    df["weights"] = weights
+    if "weight" in g.es:
+        weights = g.es["weight"]
+        df["weights"] = weights
     df["v1"] = edges[:, 0]
     df["v2"] = edges[:, 1]
-    df.to_csv(fname, sep = '\t')
+    if "label" in g.vs.attributes():
+        labels = np.array(g.vs["label"])
+        df["gene_1"] = labels[edges[:, 0]]
+        df["gene_2"] = labels[edges[:, 1]]
+    return df
     
 def graph_to_crs(g):
     if g.ecount() > g.vcount() * g.vcount() / 10:
