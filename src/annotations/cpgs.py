@@ -105,5 +105,4 @@ class cpgs_annotation:
         values = list(df[self.crit_cols[crit_col]])
         values = list(map(lambda x: x if type(x) is list else (list(x) if type(x) is set else [x]), values))
         values = [y for x in values for y in x]
-        print(values[:10])
         return list(set(values))
