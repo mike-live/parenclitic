@@ -1,6 +1,11 @@
 import numpy as np
 from multiprocessing.pool import Pool
 from threading import Event, Lock, Semaphore
+import traceback
+import multiprocessing
+
+def error(msg, *args):
+    return multiprocessing.get_logger().error(msg, *args)
 
 #import collections
 import igraph
@@ -14,6 +19,39 @@ from scipy import stats
 #from pathlib2 import Path
 import os
 import sys
+
+
+def entropy(a, b, n):
+    from scipy.special import xlogy
+    p0 = a / n
+    p1 = b / n
+    return -xlogy(p0, p0) - xlogy(p1, p1)
+
+def IG_split(p, y):
+    ids = np.argsort(p)
+    p = p[ids]
+    y = y[ids]
+    n = np.array(len(y), dtype = p.dtype)
+
+    n11 = np.cumsum(y == -1).astype(p.dtype)
+    n21 = np.cumsum(y == +1).astype(p.dtype)
+    n1 = n11[-1]
+    n2 = n21[-1]
+    n11 = n11[:-1]
+    n21 = n21[:-1]
+    n12 = n1 - n11
+    n22 = n2 - n21
+
+    gain_information = entropy(n1, n2, n) - (entropy(n11, n21, n11 + n21) * (n11 + n21) + 
+                                          entropy(n12, n22, n12 + n22) * (n12 + n22)) / n
+
+    id_imp = np.argmax(gain_information)
+    thr = (p[id_imp] + p[id_imp + 1]) / 2
+    best_gain_information = gain_information[id_imp] / (2 * np.log(2))
+    acc = ((thr > p) == (y > 0)).mean()
+    return thr, best_gain_information, acc
+
+
 
 class graph_partition:
     def __init__(self, id_part = 0, num_parts = 1, paths = None, work_dir = ''):
@@ -160,62 +198,170 @@ class classifier_kernel:
         return self.G, self.D        
     
 class pdf_kernel:
-    def __init__(self, num_points = 10000, linearity_eps = 1.0e-9, dtype = np.float32, thr_p = 0.9):
+    # thr_type in ['best', 'one']
+    def __init__(self, num_points = 10000, linearity_eps = 1.0e-9, dtype = np.float32, thr_type = 'one', division_rule = 'noncontrol', thr_p = 0.9, min_score = 0.9):
         self.num_points = num_points
         self.linearity_eps = linearity_eps
         self.dtype = dtype
         self.thr_p = thr_p
+        self.min_score = min_score
+        self.is_one = thr_type == 'one'
+        self.is_best = thr_type == 'best'
+        self.is_atypical = division_rule == 'atypical'
+        self.is_noncontrol = division_rule == 'noncontrol'
+        self.link = None
         self.G = None
         self.D = None
         self.p = None
         self.pr = None
+        self.best_thr = None
+        self.gain_information = None
+        self.score = None
+        self.num_samples = 0
     
+    # mask == -1 - control
+    # mask == +1 - deviation
+    # mask == -n - expected as control, n > 1
+    # mask == +n - expected as deviation, n > 1
     def fit(self, X_i, X_j, y, mask):
-        X_prob_i, X_prob_j = X_i[mask], X_j[mask]
+        self.num_samples = X_i.shape[0]
+        X_prob_i, X_prob_j = X_i[mask == -1], X_j[mask == -1]
         data = np.array([X_prob_i, X_prob_j])
         det = np.linalg.det(np.corrcoef(data))
 
         if abs(det) < self.linearity_eps:
-            self.pr = np.zeros((self.num_points), dtype=np.dtype)
-            self.p = np.zeros((X_i.shape[0]), dtype=np.dtype)
-            self.D = np.zeros((X_i.shape[0]), dtype=np.bool)
+            if self.is_best:
+                self.link = np.zeros((self.num_samples), dtype = np.bool)
+                self.G = np.zeros((self.num_samples), dtype = np.bool)
+                self.D = self.G.astype(self.dtype)
+                self.best_thr = 0
+                self.gain_information = 0
+                self.score = 0
+            else:
+                self.pr = np.zeros((self.num_points), dtype = self.dtype)
+                self.p = np.zeros((self.num_samples), dtype = self.dtype)
+                self.D = np.zeros((self.num_samples), dtype = np.bool)
             return self
         kde = stats.gaussian_kde(data)
         
         data = np.array([X_i, X_j])
         p = np.array(kde(data))
-        
-        points = kde.resample(self.num_points)
-        pr = np.array(kde(points))
-        pr.sort()
-
-        self.pr = pr
         self.p = p
-        self.D = np.array(p, dtype = self.dtype)
-        for i, cur_p in enumerate(p):
-            pos = np.searchsorted(pr, cur_p)
-            self.D[i] = float(self.num_points - pos) / self.num_points
+            
+        if self.is_best:
+            fit_mask = (mask == -1) | (mask == 1)
+            self.best_thr, self.gain_information, self.score = IG_split(p[fit_mask], mask[fit_mask])
+            self.link = np.zeros((self.num_samples), dtype = np.bool)
+            control_mask = mask < 0
+            deviated_mask = mask > 0
+            self.link = p < self.best_thr
+
+            if self.is_atypical:
+                self.link[deviated_mask] = ~self.link[deviated_mask]
+
+            if self.score > self.min_score:
+                self.G = self.link
+            else:
+                self.G = np.zeros((self.num_samples), dtype = np.bool)
+            self.D = self.G.astype(self.dtype)
+        elif self.is_one:
+            points = kde.resample(self.num_points)
+            pr = np.array(kde(points))
+            pr.sort()
+
+            self.pr = pr
+            self.D = np.array(p, dtype = self.dtype)
+            for i, cur_p in enumerate(p):
+                pos = np.searchsorted(pr, cur_p)
+                self.D[i] = float(self.num_points - pos) / self.num_points
            
         return self
 
-    def get_edges(self, thr_p = None):
-        if thr_p is None:
-            thr_p = self.thr_p
-        thr_p = 1 - thr_p
-        ind = int(thr_p * self.num_points)
-        if ind < len(self.pr):
-            q = self.pr[ind]
-            self.G = self.p < q
-        else:
-            self.G = np.ones((len(self.p)), dtype=np.bool)
+    def get_edges(self, thr_p = None, min_score = None):
+        if self.is_best:
+            if min_score is None:
+                min_score = self.min_score
+            
+            if self.score > min_score:
+                self.G = self.link
+            else:
+                self.G = np.zeros((self.num_samples), dtype = np.bool)
+            self.D = self.G.astype(self.dtype)
+        elif self.is_one:
+            if thr_p is None:
+                thr_p = self.thr_p
+            thr_p = 1 - thr_p
+            ind = int(thr_p * self.num_points)
+            if ind < len(self.pr):
+                q = self.pr[ind]
+                #print(ind, q, self.p.min(), self.p.max())
+                self.G = self.p < q
+            else:
+                self.G = np.ones((self.num_samples), dtype = np.bool)
         return self.G, self.D
 
+class IG_filter:
+    def __init__(self, max_score = 0.75):
+        self.score = []
+        self.max_score = max_score
+        self.num_good = 0
 
+    def fit(self, X, mask):
+        score = np.zeros((X.shape[1], 1), dtype = np.float32)
+        for i in range(X.shape[1]):
+            fit_mask = (mask == +1) | (mask == -1)
+            _, _, score[i] = IG_split(X[fit_mask, i], mask[fit_mask])
+            score[i] = max(score[i], 1 - score[i])
+        self.score = score
+        self.num_good = np.sum(self.score <= self.max_score)
+
+    def is_filtered(self, i, j):
+        is_filt = max(self.score[i], self.score[j]) > self.max_score
+        return is_filt
+
+    def __len__(self):
+        return (self.num_good - 1) * self.num_good // 2
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+    sys.stderr.flush()
+
+
+
+class parenclitic_data:
+    def __init__(self, X, y, mask, kernel):
+        self.X = X
+        self.y = y
+        self.mask = mask
+        self.kernel = kernel
+
+class parallel_calc:
+    def __init__(self, verbose):
+        self.verbose = verbose
+
+    def set_stderr(self, work_dir = '../logs'):
+        sys.stderr = open(work_dir + '/' + str(os.getpid()) + "_error.log", "a")
+
+    def init(self, X, y, mask, kernel):
+        if self.verbose == 1:
+            self.set_stderr()
+        global data
+        data = parenclitic_data(X, y, mask, kernel)
+
+    def calc_links(self, i, j):
+        global data
+        data.kernel.fit(data.X[:, i], data.X[:, j], data.y, data.mask)
+        m, d = data.kernel.get_edges()
+        if m.any():
+            return m, d
+        else:
+            return None
 
 class parenclitic:
-    def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), verbose = 0, progress_bar = 1):
+    def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), pair_filter = None, verbose = 0, progress_bar = 1):
         self.partition = partition
         self.kernel = kernel
+        self.pair_filter = pair_filter
         
         self.M = None
         self.D = None
@@ -229,7 +375,11 @@ class parenclitic:
         self.progress_bar = progress_bar
         #self.max_edges = max_edges
 
-    def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 10):
+                        
+
+
+
+    def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 2):
         """Fit the model according to the given training data.
         Parameters
         ----------
@@ -249,86 +399,130 @@ class parenclitic:
         -------
         self : object
         """
-        
-        self.X_shape = X.shape
-        assert(len(self.X_shape) == 2)
-        self.num_samples = self.X_shape[0]
-        self.num_features = self.X_shape[1]
-
-        if self.verbose == 1:
-            print('parenclitic_graphs')
-            sys.stdout.flush()
-
-        if subset is None:
-            self.partition.fit(self.num_features)
-        else:
-            self.partition.fit(subset)
-        
-        global num_done, num_pairs
-        num_done = 0
-        num_pairs = len(self.partition)
-        each_progress = int(np.sqrt(num_pairs + 0.5))            
-        if self.progress_bar:
-            from tqdm import tqdm
-            progress_bar = tqdm(total = num_pairs)
-        M, D, E = [], [], []
-        
-        need_parallel = num_workers > 1
-        if need_parallel:
-            pool = Pool(num_workers)
-            global done_tasks, ready
-            done_tasks = 0
-            ready = Semaphore(num_workers * queue_len)
-        start = timeit.default_timer()
-
-        for i, j in self.partition:
-            def upd_graph(kernel, i = i, j = j):
-                global num_done, done_tasks, ready
-                m, d = kernel.get_edges()
-                if m.any():
-                    M.append(m)
-                    D.append(d)
-                    E.append([i, j])
-            
-                if need_parallel:
-                    done_tasks += 1
-                    ready.release()
-
-                num_done += 1
-                if self.progress_bar:
-                    progress_bar.update()
-                if num_done % each_progress == 0 or num_done == num_pairs:
-                    stop = timeit.default_timer()
-                    if self.verbose == 1:
-                        print('Graph for', num_done, 'pairs calculated in', stop - start)
-                        sys.stdout.flush()
-
-            if need_parallel:
-                ready.acquire()
-                pool.apply_async(self.kernel.fit, args = (X[:, i], X[:, j], y, mask), callback = upd_graph)
-            else:
-                upd_graph(self.kernel.fit(X[:, i], X[:, j], y, mask))
-
-        if need_parallel:
-            while done_tasks < num_pairs:
-                ready.acquire()
-
-            pool.close()
-            pool.join()
+        try:
+            self.X_shape = X.shape
+            assert(len(self.X_shape) == 2)
+            self.num_samples = self.X_shape[0]
+            self.num_features = self.X_shape[1]
     
-        if self.verbose == 1:
-            sys.stdout.flush()
-        if self.progress_bar:
-            progress_bar.close()
-        if M == []:
-            self.M = np.zeros((self.num_samples, 0), dtype = np.bool)
-            self.D = np.zeros((self.num_samples, 0), dtype = np.float32)
-            self.E = np.zeros((2, 0), dtype = np.float32)
-        else:    
-            self.M = np.array(M).T
-            self.D = np.array(D).T
-            self.E = np.array(E)
-        self.is_fitted = True
+            if self.verbose == 1:
+                print('parenclitic_graphs')
+                sys.stdout.flush()
+    
+            if subset is None:
+                self.partition.fit(self.num_features)
+            else:
+                self.partition.fit(subset)
+            
+            if not self.pair_filter is None:
+                self.pair_filter.fit(X, mask)
+    
+            global num_done, num_pairs
+            num_done = 0
+            num_pairs = len(self.partition)
+            each_progress = int(np.sqrt(num_pairs + 0.5))
+            if self.progress_bar:
+                from tqdm import tqdm
+                progress_bar = tqdm(total = num_pairs)
+            #global fit
+            #globals()['X'] = X
+            #globals()['y'] = y
+            #globals()['mask'] = mask
+            fit = self.kernel.fit
+            M, D, E = [], [], []
+            
+            need_parallel = num_workers > 1
+            my_parallel_calc = parallel_calc(self.verbose)
+            if need_parallel:
+                global done_tasks, ready
+                pool = Pool(num_workers, initializer = my_parallel_calc.init, initargs = (X, y, mask, self.kernel))
+                done_tasks = 0
+                ready = Semaphore(num_workers * queue_len)
+            else:
+                my_parallel_calc.init(X, y, mask, self.kernel)
+                
+                
+            start = timeit.default_timer()
+            num_tasks = 0
+            for i, j in self.partition:
+                if not self.pair_filter is None:
+                    if self.pair_filter.is_filtered(i, j):
+                        continue
+                
+                def upd_graph(res, i = i, j = j):
+                    global num_done, done_tasks, ready
+                    if self.verbose == 1:
+                        print('upd_graphs')
+                        sys.stdout.flush()
+                    if not res is None:
+                        m, d = res
+                        #m, d = res.get_edges()
+                        if m.any():
+                            M.append(m)
+                            D.append(d)
+                            E.append([i, j])
+                
+                    if need_parallel:
+                        done_tasks += 1
+                        ready.release()
+    
+                    if self.progress_bar:
+                        progress_bar.set_description('Number of edges: %i' % len(M), refresh = False)
+                        progress_bar.update()
+
+                    num_done += 1
+                    if num_done % each_progress == 0 or num_done == num_pairs:
+                        stop = timeit.default_timer()
+                        if self.verbose == 1:
+                            print('Graph for', num_done, 'pairs calculated in', stop - start)
+                            sys.stdout.flush()
+    
+                num_tasks += 1
+                if need_parallel:
+                    '''
+                    if self.verbose == 1:
+                        print('acquire')
+                        sys.stdout.flush()
+                    '''
+                    ready.acquire()
+                    '''
+                    if self.verbose == 1:
+                        print('apply_async')
+                        sys.stdout.flush()
+                    '''
+                    #pool.apply_async(self.kernel.fit, args = (X[:, i], X[:, j], y, mask), callback = upd_graph)
+                    pool.apply_async(my_parallel_calc.calc_links, args = (i, j), callback = upd_graph) # 
+                else:
+                    #upd_graph(self.kernel.fit(X[:, i], X[:, j], y, mask))
+                    upd_graph(my_parallel_calc.calc_links(i, j))
+                    pass
+    	
+            if need_parallel:
+                while done_tasks < num_tasks:
+                    ready.acquire()
+    
+                pool.close()
+                pool.join()
+        
+            if self.verbose == 1:
+                print('ready done')
+                sys.stdout.flush()
+    
+            if self.progress_bar:
+                progress_bar.close()
+            if M == []:
+                self.M = np.zeros((self.num_samples, 0), dtype = np.bool)
+                self.D = np.zeros((self.num_samples, 0), dtype = np.float32)
+                self.E = np.zeros((2, 0), dtype = np.float32)
+            else:    
+                self.M = np.array(M).T
+                self.D = np.array(D).T
+                self.E = np.array(E)
+            self.is_fitted = True
+        except:
+            if self.progress_bar:
+                progress_bar.close()
+            raise
         return self
         
     def save_part_graphs(self):
