@@ -318,6 +318,7 @@ def parenclitic_feature_names():
     feature_names['max_degrees'] = 'Max degrees'
     feature_names['mean_degrees'] = 'Mean degrees'
     feature_names['std_degrees'] = 'Std degrees'
+    feature_names['zeros_degrees'] = 'Zeros degrees'
     
     feature_names['efficiency'] = 'Efficiency'
     feature_names['betweenness'] = 'Betweenness'
@@ -325,18 +326,21 @@ def parenclitic_feature_names():
     feature_names['max_betweenness'] = 'Max betweenness'
     feature_names['mean_betweenness'] = 'Mean betweenness'
     feature_names['std_betweenness'] = 'Std betweenness'
+    feature_names['zeros_betweenness'] = 'Zeros betweenness'
     
     feature_names['closeness'] = 'Closeness'
     feature_names['min_closeness'] = 'Min closeness'
     feature_names['max_closeness'] = 'Max closeness'
     feature_names['mean_closeness'] = 'Mean closeness'
     feature_names['std_closeness'] = 'Std closeness'
+    feature_names['zeros_closeness'] = 'Zeros closeness'
     
     feature_names['pagerank'] = 'Pagerank'
     feature_names['min_pagerank'] = 'Min pagerank'
     feature_names['max_pagerank'] = 'Max pagerank'
     feature_names['mean_pagerank'] = 'Mean pagerank'
     feature_names['std_pagerank'] = 'Std pagerank'
+    feature_names['zeros_pagerank'] = 'Zeros pagerank'
     
     feature_names['eigenvalues'] = 'Eigenvalues'
     feature_names['eigenvector_centrality'] = 'Eigenvector centrality'
@@ -344,7 +348,13 @@ def parenclitic_feature_names():
     feature_names['max_eigenvector_centrality'] = 'Max eigenvector centrality'
     feature_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'
     feature_names['std_eigenvector_centrality'] = 'Std eigenvector centrality'
+    feature_names['zeros_eigenvector_centrality'] = 'Zeros eigenvector centrality'
+
     feature_names['num_edges'] = 'Number of edges'
+    feature_names['num_nodes'] = 'Number of nodes'
+    feature_names['max_component'] = 'Max component size'
+    feature_names['max_component_norm_nodes'] = 'Max component size norm nodes'
+    feature_names['max_component_norm_edges'] = 'Max component size norm edges'
 
     feature_names['eigenvalues_intervals'] = 'Eigenvalues intervals'
     feature_names['eigenvalues_intervals_normalized'] = 'Eigenvalues intervals normalized'
@@ -353,15 +363,18 @@ def parenclitic_feature_names():
     feature_names['max_IPR'] = 'Max IPR'
     feature_names['mean_IPR'] = 'Mean IPR'
 
-    feature_names['weights'] = 'Weights'
-    feature_names['sum_weights'] = 'Sum weights'
-    feature_names['min_weights'] = 'Min weights'
-    feature_names['max_weights'] = 'Max weights'
-    feature_names['mean_weights'] = 'Mean weights'
-    feature_names['std_weights'] = 'Std weights'
+    feature_names['weight'] = 'Weights'
+    feature_names['sum_weight'] = 'Sum weights'
+    feature_names['min_weight'] = 'Min weights'
+    feature_names['max_weight'] = 'Max weights'
+    feature_names['mean_weight'] = 'Mean weights'
+    feature_names['std_weight'] = 'Std weights'
+    feature_names['zeros_weight'] = 'Zeros weights'
     
     feature_names['community_edge_betweenness_optimal'] = 'Community edge betweenness: optimal count'
-        
+    
+    feature_names['component_sizes'] = 'Component sizes'
+    
     feature_names['robustness'] = 'Robustness'
     return feature_names    
 
@@ -445,7 +458,8 @@ def make_genes_edge(X_prob_i, X_prob_j, X_i, X_j, thresholds_p):
     points = kde.resample(num_points)
     pr = np.array(kde(points))
     pr.sort()
-    #I = np.concatenate([np.cumsum(pr), [1]])
+    I = np.concatenate([np.cumsum(pr), [1]])
+    print(I)
     G = np.zeros((len(thresholds_p), X_i.shape[0]), dtype=np.bool)
     for i, thr_p in enumerate(thresholds_p):
         #ind = np.flatnonzero(I >= thr_p)[0]
