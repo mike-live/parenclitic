@@ -7,7 +7,7 @@ from pathlib2 import Path
 
 params = collections.OrderedDict([
     ("num_cpgs", param(150254, name = 'num_cpgs')), # 150254
-    ("normalization", param('nf', name = 'normalization')), # 150254
+    ("normalization", param('qf', name = 'normalization')), # 150254
     ("kde_mask", param('healthy_mask', name = 'kde_mask')),
     ("algorithm", param('svc', name = 'algorithm')),
     ("geotypes", param(['Island'], name = 'geotypes')),
@@ -25,8 +25,8 @@ params = collections.OrderedDict([
 files = {
     "gene_chromosome": 'gene_chr.txt',
     #"x": 'average_beta.txt',
-    "x": 'GSE52588_beta_nf.txt',
-    "beta_values": 'GSE52588_beta_nf.npz',
+    "x": 'GSE52588_beta_qf.txt',
+    "beta_values": 'GSE52588_beta_qf.npz',
     "cpgs_annotations": "cpgs_annotations.txt",
     "patients_info": "GSE52588_samples.txt",
     "cells": "cells.tsv",

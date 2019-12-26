@@ -6,9 +6,13 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_genes", param(15024, name = 'num_genes')), # 15024, 20270
-    ("kde_mask", param('mothers_mask', name = 'kde_mask')),
-    ("algorithm", param('svc', name = 'algorithm')),
+    ("num_genes", param(14756, name = 'num_genes')), # 15024, 20270
+    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
+    ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
+    ("thr_type", param('best', name = 'thr_type')), # best, one
+    ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
+    #("thr_p", param(0.88, name = 'thr_p')),
+    #("by_group", param(True, name = 'by_group')),
     ("min_score", param(0.9, name = 'min_score')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
@@ -27,6 +31,8 @@ files = {
     "horvath_cpgs_beta": "horvath_cpgs_beta.txt",
     "name_genes": 'linreg_genes_mean_islands_shores',
     "good_pairs": "good_pairs.npz",
+    "down_phenotypes_table": "DOWN_FENOTIPO_No4,8,12_PerCorrelazioni.tsv",
+    "patients_info": "GSE52588_samples.txt",
     #"ranged_genes": 'linreg_genes_mean_islands_shores.txt',
     "g": 'graph',
     "kdes": Path('kdes') / 'kdes',
@@ -45,18 +51,18 @@ files = {
 }
 
 params_sets = {
-    "graphs": set(['kde_mask', 'num_genes', 'algorithm', 'id_part', 'num_parts']),
-    "graph": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
-    "degrees": set(['kde_mask', 'num_genes', 'algorithm']),
-    "parenclitic": set(['kde_mask', 'num_genes', 'algorithm']),
-    "degrees_sample": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
-    "parenclitic_sample": set(['kde_mask', 'num_genes', 'algorithm', 'id_sample']),
-    "degrees_boxplots": set(['kde_mask', 'num_genes', 'algorithm']),
-    "parenclitic_boxplots": set(['kde_mask', 'num_genes', 'algorithm']),
-    "diff_graph": set(['kde_mask', 'num_genes', 'algorithm']),
-    "pair_genes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
-    "kdes": set(['kde_mask', 'num_genes', 'algorithm', 'id_pair']),
-    "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'id_parenclitic']),
+    "graphs": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_part', 'num_parts']),
+    "graph": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "degrees": set(['kde_mask', 'num_genes', 'algorithm', 'by_group']),
+    "parenclitic": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "degrees_sample": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "parenclitic_sample": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "degrees_boxplots": set(['kde_mask', 'num_genes', 'algorithm', 'by_group']),
+    "parenclitic_boxplots": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'division_rule', 'thr_type']),
+    "diff_graph": set(['kde_mask', 'num_genes', 'algorithm', 'by_group','thr_type', 'division_rule']),
+    "pair_genes": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
+    "kdes": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
+    "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
     "down_phenotypes": set(['num_genes']),
 }
 

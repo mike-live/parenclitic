@@ -3,22 +3,31 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import sys
 
+
 def get_classes(config, X):
-    y = np.zeros((X.shape[0], ), dtype = 'uint8')
+    y = np.zeros((X.shape[0], ), dtype = 'int8')
     y[config.params["mongoloids_mask"].value] = 0
     y[config.params["siblings_mask"].value] = 1
     y[config.params["mothers_mask"].value] = 2
     mask = y.copy()
     if config.params["kde_mask"].value == "mothers_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
-        mask[config.params["mothers_mask"].value] = 1
-        mask[config.params["siblings_mask"].value] = 2
+        mask[config.params["mongoloids_mask"].value] = 1
+        mask[config.params["mothers_mask"].value] = -1
+        mask[config.params["siblings_mask"].value] = -2
     elif config.params["kde_mask"].value == "siblings_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
+        mask[config.params["mongoloids_mask"].value] = 1
+        mask[config.params["siblings_mask"].value] = -1
+        mask[config.params["mothers_mask"].value] = -2
+    elif config.params["kde_mask"].value == "healthy_mask":
+        mask[config.params["mongoloids_mask"].value] = 1
+        mask[config.params["siblings_mask"].value] = -1
+        mask[config.params["mothers_mask"].value] = -1
+    elif config.params["kde_mask"].value == "mongoloids_mask":
+        mask[config.params["mongoloids_mask"].value] = -1
         mask[config.params["siblings_mask"].value] = 1
         mask[config.params["mothers_mask"].value] = 2
-    elif config.params["kde_mask"].value == "healthy_mask":
-        mask[config.params["mongoloids_mask"].value] = 0
+    elif config.params["kde_mask"].value == "nonhealthy_mask":
+        mask[config.params["mongoloids_mask"].value] = -1
         mask[config.params["siblings_mask"].value] = 1
         mask[config.params["mothers_mask"].value] = 1
     return y, mask
