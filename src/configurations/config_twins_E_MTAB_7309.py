@@ -8,8 +8,8 @@ from pathlib2 import Path
 params = collections.OrderedDict([
     ("num_genes", param(14743, name = 'num_genes')), # 15024, 20270
     ("kde_mask", param('less_65_mask', name = 'kde_mask')),
-    ("algorithm", param('svc', name = 'algorithm')), # svc, kde
-    #("thr_p", param(0.9, name = 'thr_p')),
+    ("algorithm", param('kde', name = 'algorithm')), # svc, kde
+    ("thr_p", param(0.99, name = 'thr_p')),
     ("min_score", param(0.7, name = 'min_score')),
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 1058, num_ticks = 1059, name = 'id_sample')),
