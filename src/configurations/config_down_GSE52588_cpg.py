@@ -8,9 +8,13 @@ from pathlib2 import Path
 params = collections.OrderedDict([
     ("num_cpgs", param(150254, name = 'num_cpgs')), # 150254
     ("normalization", param('qf', name = 'normalization')), # 150254
-    ("kde_mask", param('healthy_mask', name = 'kde_mask')),
-    ("algorithm", param('svc', name = 'algorithm')),
-    ("geotypes", param(['Island'], name = 'geotypes')),
+    ("geotypes", param(['Island'], name = 'geotypes')), # ONLY ISLANDS!!!
+    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
+    ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
+    ("thr_type", param('best', name = 'thr_type')), # best, one
+    ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
+    #("thr_p", param(0.88, name = 'thr_p')),
+    #("by_group", param(True, name = 'by_group')),
     ("min_score", param(0.9, name = 'min_score')),
     ("id_part", param(value_be = 0, value_en = 899, num_ticks = 900, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
@@ -53,20 +57,20 @@ files = {
 }
 
 params_sets = {
-    "graphs": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_part', 'num_parts']),
-    "graph": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
-    "degrees": set(['kde_mask', 'num_cpgs', 'algorithm']),
-    "parenclitic": set(['kde_mask', 'num_cpgs', 'algorithm']),
-    "degrees_sample": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
-    "parenclitic_sample": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_sample']),
-    "degrees_boxplots": set(['kde_mask', 'num_cpgs', 'algorithm']),
-    "parenclitic_boxplots": set(['kde_mask', 'num_cpgs', 'algorithm']),
-    "diff_graph": set(['kde_mask', 'num_cpgs', 'algorithm']),
-    "pair_genes": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
-    "kdes": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_pair']),
-    "parenclitic_boxplot": set(['kde_mask', 'num_cpgs', 'algorithm', 'id_parenclitic']),
+    "graphs": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_part', 'num_parts']),
+    "graph": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "degrees": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "parenclitic": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "degrees_sample": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "parenclitic_sample": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
+    "degrees_boxplots": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "parenclitic_boxplots": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "diff_graph": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "pair_genes": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
+    "kdes": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
+    "parenclitic_boxplot": set(['geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
     "down_phenotypes": set(['normalization', 'num_cpgs']),
-    "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm']),
+    "down_epimutations": set(['normalization', 'geotypes', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
     "age_related": set([]),
 }
 
