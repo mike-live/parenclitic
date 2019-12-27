@@ -306,7 +306,7 @@ class IG_filter:
         self.max_score = max_score
         self.num_good = 0
 
-    def fit(self, X, mask):
+    def fit(self, X, mask, iterable):
         score = np.zeros((X.shape[1], 1), dtype = np.float32)
         for i in range(X.shape[1]):
             fit_mask = (mask == +1) | (mask == -1)
@@ -314,13 +314,31 @@ class IG_filter:
             score[i] = max(score[i], 1 - score[i])
         self.score = score
         self.num_good = np.sum(self.score <= self.max_score)
+        self.iterable = iterable
+        
 
     def is_filtered(self, i, j):
         is_filt = max(self.score[i], self.score[j]) > self.max_score
         return is_filt
 
+    def __iter__(self):
+        for pair in self.iterable:
+            if not self.is_filtered(pair[0], pair[1]):
+                yield pair[0], pair[1]
+    
     def __len__(self):
         return (self.num_good - 1) * self.num_good // 2
+
+
+import itertools
+def chunked_iterable(iterable, size):
+    it = iter(iterable)
+    while True:
+        chunk = list(itertools.islice(it, size))
+        if not chunk:
+            break
+        yield chunk
+
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -353,9 +371,22 @@ class parallel_calc:
         data.kernel.fit(data.X[:, i], data.X[:, j], data.y, data.mask)
         m, d = data.kernel.get_edges()
         if m.any():
-            return m, d
+            return m, d, i, j
         else:
             return None
+
+    def calc_batch(self, ids):
+        res = []
+        ok = False
+        for i, j in ids:
+            cur = self.calc_links(i, j)
+            res.append(cur)
+            if not cur is None:
+                ok = True
+        if ok:
+            return np.array(res)
+        else:
+            return len(res)
 
 class parenclitic:
     def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), pair_filter = None, verbose = 0, progress_bar = 1):
@@ -379,7 +410,7 @@ class parenclitic:
 
 
 
-    def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 2):
+    def fit(self, X, y, mask, subset = None, num_workers = 1, queue_len = 2, chunk_size = 10):
         """Fit the model according to the given training data.
         Parameters
         ----------
@@ -415,11 +446,14 @@ class parenclitic:
                 self.partition.fit(subset)
             
             if not self.pair_filter is None:
-                self.pair_filter.fit(X, mask)
+                self.pair_filter.fit(X, mask, self.partition)
+                self.pairs = self.pair_filter
+            else:
+                self.pairs = self.partition
     
             global num_done, num_pairs
             num_done = 0
-            num_pairs = len(self.partition)
+            num_pairs = len(self.pairs)
             each_progress = int(np.sqrt(num_pairs + 0.5))
             if self.progress_bar:
                 from tqdm import tqdm
@@ -441,41 +475,44 @@ class parenclitic:
             else:
                 my_parallel_calc.init(X, y, mask, self.kernel)
                 
+
+            def upd_graph(res):
+                global num_done, done_tasks, ready
+                if self.verbose == 1:
+                    print('upd_graphs')
+                    sys.stdout.flush()
+                if not type(res) is int:
+                    for cur in res:
+                        if not cur is None:
+                            m, d, i, j = cur
+                            #m, d = res.get_edges()
+                            if m.any():
+                                M.append(m)
+                                D.append(d)
+                                E.append([i, j])
+                    res = len(res)
+                                
+                if need_parallel:
+                    done_tasks += 1
+                    ready.release()
+    
+                if self.progress_bar:
+                    progress_bar.set_description('Number of edges: %i' % len(M), refresh = False)
+                    progress_bar.update(res)
+
+                num_done += 1
+                if num_done % each_progress == 0 or num_done == num_pairs:
+                    stop = timeit.default_timer()
+                    if self.verbose == 1:
+                        print('Graph for', num_done, 'pairs calculated in', stop - start)
+                        sys.stdout.flush()
                 
             start = timeit.default_timer()
             num_tasks = 0
-            for i, j in self.partition:
-                if not self.pair_filter is None:
-                    if self.pair_filter.is_filtered(i, j):
-                        continue
-                
-                def upd_graph(res, i = i, j = j):
-                    global num_done, done_tasks, ready
-                    if self.verbose == 1:
-                        print('upd_graphs')
-                        sys.stdout.flush()
-                    if not res is None:
-                        m, d = res
-                        #m, d = res.get_edges()
-                        if m.any():
-                            M.append(m)
-                            D.append(d)
-                            E.append([i, j])
-                
-                    if need_parallel:
-                        done_tasks += 1
-                        ready.release()
-    
-                    if self.progress_bar:
-                        progress_bar.set_description('Number of edges: %i' % len(M), refresh = False)
-                        progress_bar.update()
-
-                    num_done += 1
-                    if num_done % each_progress == 0 or num_done == num_pairs:
-                        stop = timeit.default_timer()
-                        if self.verbose == 1:
-                            print('Graph for', num_done, 'pairs calculated in', stop - start)
-                            sys.stdout.flush()
+            for ids in chunked_iterable(self.pairs, chunk_size):
+                #if not self.pair_filter is None:
+                #    if self.pair_filter.is_filtered(i, j):
+                #        continue
     
                 num_tasks += 1
                 if need_parallel:
@@ -491,10 +528,15 @@ class parenclitic:
                         sys.stdout.flush()
                     '''
                     #pool.apply_async(self.kernel.fit, args = (X[:, i], X[:, j], y, mask), callback = upd_graph)
-                    pool.apply_async(my_parallel_calc.calc_links, args = (i, j), callback = upd_graph) # 
+                    
+                    #pool.apply_async(my_parallel_calc.calc_links, args = (i, j), callback = upd_graph) # 
+                    pool.apply_async(my_parallel_calc.calc_batch, args = (np.array(ids), ), callback = upd_graph) # 
+                    pass
                 else:
                     #upd_graph(self.kernel.fit(X[:, i], X[:, j], y, mask))
-                    upd_graph(my_parallel_calc.calc_links(i, j))
+                    #upd_graph(len(ids))
+                    #upd_graph(my_parallel_calc.calc_links(i, j))
+                    upd_graph(my_parallel_calc.calc_batch(np.array(ids)))
                     pass
     	
             if need_parallel:
