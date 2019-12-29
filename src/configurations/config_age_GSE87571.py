@@ -12,7 +12,7 @@ params = collections.OrderedDict([
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
     ("thr_p", param(0.88, name = 'thr_p')),
     #("by_group", param(True, name = 'by_group')),
-    ("min_score", param(0.9, name = 'min_score')),
+    ("min_score", param(0.85, name = 'min_score')),
     ("age_delimiter", param(28, name = 'age_delimiter')),
 #    ("num_groups", param(4, name = 'num_groups')),  
 #    ("age_group", param(value_be = 1, value_en = 4, num_ticks = 4, name = 'age_group')),  
