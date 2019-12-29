@@ -16,12 +16,14 @@ def get_classes(config, X):
         num_groups = 2
         bins = np.array([0, age_delimiter, 100])
         
-    y = ((np.minimum(np.digitize(age, bins), num_groups) - 1) * 2 - 1)
-    config.params["young_mask"].value = np.flatnonzero(y == -1)
-    config.params["old_mask"].value = np.flatnonzero(y == +1)
+    y = (np.minimum(np.digitize(age, bins), num_groups) - 1)
+    config.params["young_mask"].value = np.flatnonzero(y == 0)
+    config.params["old_mask"].value = np.flatnonzero(y == 1)
 
     #config.params["kde_mask"].value = "young_mask"
-    mask = y == -1
+    mask = np.array(y)
+    mask[y == 0] = -1
+    mask[y == 1] = +1
     return y, mask, age
 
 
