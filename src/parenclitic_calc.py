@@ -38,7 +38,7 @@ if __name__ == "__main__":
     #clf = parenclitic.parenclitic(kernel = parenclitic.pdf_kernel(thr_p = 0.88))#, partition = parenclitic.graph_partition_subset())
     be = time.time()
     #clf.fit(X, y, mask, num_workers = 5)
-    clf.fit(X[:, :1000], y[:], mask[:], num_workers = num_workers, chunk_size = 1000)
+    clf.fit(X[:, :], y[:], mask[:], num_workers = num_workers, chunk_size = 1000)
     en = time.time()
     print(en - be)
     #clf.calc_parenclitic()
