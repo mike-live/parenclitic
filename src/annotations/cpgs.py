@@ -2,6 +2,7 @@
 import pandas as pd
 import math
 import numpy as np
+from collections import defaultdict
 
 def is_intersect(a, b):
     #if not hasattr(a, '__len__'):
@@ -106,3 +107,19 @@ class cpgs_annotation:
         values = list(map(lambda x: x if type(x) is list else (list(x) if type(x) is set else [x]), values))
         values = [y for x in values for y in x]
         return list(set(values))
+
+    def aggregate(self, crit_col_key, crit_col_value, criterions = None, original = False):
+        df = self.get_sub_frame(criterions = criterions, original = original)
+        d = defaultdict(list)
+        for index, x in df.iterrows():
+            keys = x[self.crit_cols[crit_col_key]]
+            keys = list(keys) if type(keys) is set else [keys]
+            values = x[self.crit_cols[crit_col_value]]
+            values = list(values) if type(values) is set else [values]
+            for key in keys:
+                for value in values:
+                    d[key].append(value)
+        for key in d:
+            d[key] = list(set(d[key]))
+        return d
+
