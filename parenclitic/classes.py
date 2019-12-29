@@ -507,6 +507,9 @@ class parenclitic:
                         print('Graph for', num_done, 'pairs calculated in', stop - start)
                         sys.stdout.flush()
                 
+            if self.verbose == 1:
+                print('start iterate')
+                sys.stdout.flush()
             start = timeit.default_timer()
             num_tasks = 0
             for ids in chunked_iterable(self.pairs, chunk_size):
@@ -533,6 +536,9 @@ class parenclitic:
                     pool.apply_async(my_parallel_calc.calc_batch, args = (np.array(ids), ), callback = upd_graph) # 
                     pass
                 else:
+                    if self.verbose == 1:
+                        print('calc batch')
+                        sys.stdout.flush()
                     #upd_graph(self.kernel.fit(X[:, i], X[:, j], y, mask))
                     #upd_graph(len(ids))
                     #upd_graph(my_parallel_calc.calc_links(i, j))
@@ -555,7 +561,7 @@ class parenclitic:
             if M == []:
                 self.M = np.zeros((self.num_samples, 0), dtype = np.bool)
                 self.D = np.zeros((self.num_samples, 0), dtype = np.float32)
-                self.E = np.zeros((2, 0), dtype = np.float32)
+                self.E = np.zeros((0, 2), dtype = np.float32)
             else:    
                 self.M = np.array(M).T
                 self.D = np.array(D).T
