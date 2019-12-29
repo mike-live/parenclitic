@@ -6,8 +6,12 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_genes", param(15605, name = 'num_genes')), # 15024, 20270
-    ("algorithm", param('svc', name = 'algorithm')),
+    ("num_genes", param(14768, name = 'num_genes')), # 15024, 20270
+    ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
+    ("thr_type", param('best', name = 'thr_type')), # best, one
+    ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
+    ("thr_p", param(0.88, name = 'thr_p')),
+    #("by_group", param(True, name = 'by_group')),
     ("min_score", param(0.9, name = 'min_score')),
     ("age_delimiter", param(28, name = 'age_delimiter')),
 #    ("num_groups", param(4, name = 'num_groups')),  
@@ -24,9 +28,12 @@ params = collections.OrderedDict([
 
 files = {
     "gene_chromosome": 'gene_chr.txt',
-    "x": 'beta_genes_mean.npz',
+    "x": 'GSE87571_beta_qf.npz',
+    "beta_gene_mean": 'GSE87571_beta_gene_mean.npz',
     "patients_info": "GSE87571_samples.txt",
-    "cpgs_annotations": "cpgs_annotations.txt",
+    "cpgs_annotations": Path("..") / "common" / "cpgs_annotations.txt",
+    "betas_dict": "betas_dict.pkl",
+    "bad_cpgs": Path("..") / "common" / "bad_cpgs.txt",
     "g": 'graph',
     "kdes": Path('kdes') / 'kdes',
     "graphs": 'graphs',
@@ -45,7 +52,7 @@ files = {
 }
 
 params_sets = {
-    "graphs": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_part', 'num_parts']),
+    "graphs": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
     "graph": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups', 'id_sample']),
     "degrees": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),
     "parenclitic": set(['num_genes', 'algorithm', 'age_delimiter', 'num_groups']),

@@ -5,7 +5,7 @@ import sys
 import pandas as pd
 
 def get_classes(config, X):
-    patients_info = pd.read_csv(config.ifname("patients_info"), sep = ' ')
+    patients_info = pd.read_csv(config.ifname("patients_info"), sep = '\t')
     age = patients_info['age']
     if "num_groups" in config.params:
         num_groups = config.params["num_groups"].value
@@ -16,21 +16,21 @@ def get_classes(config, X):
         num_groups = 2
         bins = np.array([0, age_delimiter, 100])
         
-    y = np.minimum(np.digitize(age, bins), num_groups) - 1
-    config.params["young_mask"].value = np.flatnonzero(y == 1)
-    config.params["old_mask"].value = np.flatnonzero(y == 0)
+    y = ((np.minimum(np.digitize(age, bins), num_groups) - 1) * 2 - 1)
+    config.params["young_mask"].value = np.flatnonzero(y == -1)
+    config.params["old_mask"].value = np.flatnonzero(y == +1)
 
     #config.params["kde_mask"].value = "young_mask"
-    mask = y == 0
+    mask = y == -1
     return y, mask, age
 
 
 def load_data_age_GSE87571():
     from configurations.config_age_GSE87571 import config
     start = timeit.default_timer()
-    data = np.load(config.ifname("x"))
+    data = np.load(config.ifname("beta_gene_mean"))
     X = data['X']
-    genes_names = data['genes_names']
+    genes_names = data['gene_names']
     
     config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
 
