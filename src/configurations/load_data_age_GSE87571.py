@@ -34,6 +34,8 @@ def load_data_age_GSE87571():
     
     config.params["num_genes"].value = min(genes_names.size, config.params["num_genes"].value)
 
+    X = X.T
+
     stop = timeit.default_timer()
     print('Data loaded: ', stop - start)
     print(X.dtype, X.shape)
