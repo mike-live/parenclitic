@@ -6,7 +6,7 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_cpgs", param(250254, name = 'num_cpgs')), # 150254
+    ("num_cpgs", param(385730, name = 'num_cpgs')), # 150254
     ("kde_mask", param('siblings_mask', name = 'kde_mask')),
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
@@ -19,9 +19,6 @@ params = collections.OrderedDict([
     ("num_parts", param(30, name = 'num_parts')),
     ("num_workers", param(10, name = 'num_workers')),
     ("num_samples", param(87, name = 'num_samples')),
-    ("mongoloids_mask", param(np.arange(0, 29), name = 'mongoloids_mask')),
-    ("siblings_mask", param(np.arange(29, 58), name = 'siblings_mask')),
-    ("mothers_mask", param(np.arange(58, 87), name = 'mothers_mask')),
 ])
 
 files = {
@@ -70,6 +67,7 @@ params_sets = {
     "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
     "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
     "down_phenotypes": set(['num_genes']),
+    "variance": set(['normalization', 'num_cpgs']),
     "age_related": set([]),
 }
 
