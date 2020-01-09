@@ -7,7 +7,7 @@ from pathlib2 import Path
 
 params = collections.OrderedDict([
     ("num_genes", param(14756, name = 'num_genes')), # 15024, 20270
-    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
+    ("kde_mask", param('mothers_mask', name = 'kde_mask')),
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
