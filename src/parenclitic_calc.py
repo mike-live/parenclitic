@@ -2,11 +2,11 @@ import parenclitic
 import numpy as np
 import sys
 
-#from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
-#from configurations.config_down_GSE52588 import config
+from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
+from configurations.config_down_GSE52588 import config
 
-from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
-from configurations.config_age_GSE87571 import config
+#from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
+#from configurations.config_age_GSE87571 import config
 
 import multiprocessing as mp
 import multiprocessing, logging
@@ -19,8 +19,9 @@ if __name__ == "__main__":
     else:
         num_workers = 2
     print('Start with', num_workers, 'workers')
-    #X, y, mask, all_features_names = load_data_down_GSE52588()
-    X, y, mask, all_features_names, age = load_data_age_GSE87571()
+    print('Graph path', config.ofname(["graphs", "g"], ext = ".tsv", include_set = config.params_sets["graph"]))
+    X, y, mask, all_features_names = load_data_down_GSE52588()
+    #X, y, mask, all_features_names, age = load_data_age_GSE87571()
 
     import time
     num_samples = X.shape[0]
