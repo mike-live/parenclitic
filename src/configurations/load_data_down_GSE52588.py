@@ -80,17 +80,28 @@ def load_data_down_GSE52588_cpgs():
 
     sys.stdout.flush()
     
+    from annotations.cpgs import cpgs_annotation
+    cpgs = cpgs_annotation(config.ifname('cpgs_annotations'))
+    bad_cpgs = np.loadtxt(config.ifname('bad_cpgs'), dtype='str')
+    
     import pandas as pd
-    cpgs_info = pd.read_csv(config.ifname("cpgs_annotations"), delimiter='\t')
-    cpgs_island = cpgs_info["ID_REF"][cpgs_info["RELATION_TO_UCSC_CPG_ISLAND"] == "Island"]
+    #cpgs_info = pd.read_csv(config.ifname("cpgs_annotations"), delimiter='\t')
+    #cpgs_island = cpgs_info["ID_REF"][cpgs_info["RELATION_TO_UCSC_CPG_ISLAND"] == "Island"]
     
-    cpgs_all = np.array(cpgs_info["ID_REF"])
+    #cpgs_all = np.array(cpgs_info["ID_REF"])
+
+    subset_cpg_names, ids = cpgs.get_cpgs({'gene_out': [np.NaN], 
+                                     'cpgs_in': cpgs_names, 
+                                     'chr_out': ['X', 'Y'], 
+                                     'geotype_in': ['Island'],
+                                     'cpgs_out': bad_cpgs})
+    cpgs_names, indices, _ = np.intersect1d(cpgs_names, subset_cpg_names, return_indices = True)
     
-    cpgs_island = np.array(cpgs_island)
-    cpgs_names = np.array(cpgs_names)
-    _, indices, _ = np.intersect1d(cpgs_names, cpgs_all, return_indices = True)
+    #cpgs_island = np.array(cpgs_island)
+    #cpgs_names = np.array(cpgs_names)
+    #_, indices, _ = np.intersect1d(cpgs_names, cpgs_all, return_indices = True)
     
-    cpgs_names = cpgs_names[indices]
+    #cpgs_names = cpgs_names[indices]
     X = X[indices, :]
     X = X.T
     
