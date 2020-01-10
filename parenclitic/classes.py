@@ -301,24 +301,28 @@ class pdf_kernel:
         return self.G, self.D
 
 class IG_filter:
-    def __init__(self, max_score = 0.75):
+    def __init__(self, max_score = 0.75, max_IG = 1):
         self.score = []
         self.max_score = max_score
+        self.max_IG = max_IG
         self.num_good = 0
 
     def fit(self, X, mask, iterable):
         score = np.zeros((X.shape[1], 1), dtype = np.float32)
+        gain_information = np.zeros((X.shape[1], 1), dtype = np.float32)
         for i in range(X.shape[1]):
             fit_mask = (mask == +1) | (mask == -1)
-            _, _, score[i] = IG_split(X[fit_mask, i], mask[fit_mask])
+            _, gain_information[i], score[i] = IG_split(X[fit_mask, i], mask[fit_mask])
             score[i] = max(score[i], 1 - score[i])
+
         self.score = score
-        self.num_good = np.sum(self.score <= self.max_score)
+        self.gain_information = gain_information
+        self.num_good = int(np.sum((self.score <= self.max_score) & (self.gain_information <= self.max_IG)))
         self.iterable = iterable
         
 
     def is_filtered(self, i, j):
-        is_filt = max(self.score[i], self.score[j]) > self.max_score
+        is_filt = (max(self.score[i], self.score[j]) > self.max_score) or (max(self.gain_information[i], self.gain_information[j]) > self.max_IG)
         return is_filt
 
     def __iter__(self):
