@@ -53,7 +53,7 @@ def save_graph_as_csv(config, features_names = None, num_vertices = None, id_thr
     graph_to_csv(g).to_csv(fname, sep = '\t')
 
 def graph_to_csv(g):
-    edges = np.array([e.tuple for e in g.es])
+    edges = np.array([e.tuple for e in g.es]).reshape((-1, 2)).astype(np.int32)
     df = pd.DataFrame()
     if "weight" in g.es:
         weights = g.es["weight"]
