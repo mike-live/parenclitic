@@ -64,6 +64,8 @@ def graph_to_csv(g):
         labels = np.array(g.vs["label"])
         df["gene_1"] = labels[edges[:, 0]]
         df["gene_2"] = labels[edges[:, 1]]
+    for attribute in g.es.attributes():
+        df[attribute] = g.es[attribute]
     return df
     
 def graph_to_crs(g):
