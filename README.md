@@ -18,6 +18,8 @@ First, we identify and exclude features that can distinguish samples only by lin
 Second, we identify pairs of features and construct graph representation of those pairwise connections.
 One node of network is a feature, and edge characterizes deviation of subject from control group by those 2 features.
 
+![Scatter of 3 groups: Siblings = Control, DS = Deviated, Mothers = Test](images/parenclitic_pair_scatter.png)
+
 Next step is a metric computation of graphs and understanding of underlying network complexity. 
 Those metrics can be used as reduction of dimensionality for further ML algorithms.
 
