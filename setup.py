@@ -1,8 +1,13 @@
 from setuptools import setup
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(name='parenclitic',
-      version='0.1.5',
+      version='0.1.6',
       description='Parenclitic approach with kernels inside',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       url='https://github.com/mike-live/parenclitic',
       author='Mikhail Krivonosov',
       author_email='mike_live@mail.ru',
@@ -23,7 +28,6 @@ setup(name='parenclitic',
           'License :: OSI Approved :: MIT License',
           'Natural Language :: English',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
