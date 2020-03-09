@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='parenclitic',
-      version='0.1.6',
+      version='0.1.7',
       description='Parenclitic approach with kernels inside',
       long_description=long_description,
       long_description_content_type="text/markdown",
