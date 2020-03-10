@@ -113,5 +113,5 @@ The project team from british side is coordinated by T. Nazarenko.
 
 ## Acknowledgements
 
-This work was supported by the megagrant "Digital personalized medicine for healthy aging (CPM-aging): network analysis of Large multi-omics data to search for new diagnostic, predictive and therapeutic goals" ¹ 074-02-2018-330 (1), and by the MRC grant MR/R02524X/1.
+This work was supported by the megagrant "Digital personalized medicine for healthy aging (CPM-aging): network analysis of Large multi-omics data to search for new diagnostic, predictive and therapeutic goals" â„– 074-02-2018-330 (1), and by the MRC grant MR/R02524X/1.
 
