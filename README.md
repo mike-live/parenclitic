@@ -108,9 +108,10 @@ Parallel computation based on multiprocessing library and it can paralellize fea
 
 ## The Team
 
-Parenclitic project started by Krivonosov Mikhail in 2018 in Lobachevsky State University based on many works of M. Zanin, A. Zaikin.
+Parenclitic project is mainly developed by Krivonosov Mikhail as NNGU-UCL collaboration under the supervision of M. Ivanchenko and A. Zaikin.
+The project team from british side is coordinated by T. Nazarenko.
 
 ## Acknowledgements
 
-This work was supported by the megagrant "Digital personalized medicine for healthy aging (CPM-aging): network analysis of Large multi-omics data to search for new diagnostic, predictive and therapeutic goals" ¹ 074-02-2018-330 (1).
+This work was supported by the megagrant "Digital personalized medicine for healthy aging (CPM-aging): network analysis of Large multi-omics data to search for new diagnostic, predictive and therapeutic goals" ¹ 074-02-2018-330 (1), and by the MRC grant MR/R02524X/1.
 
