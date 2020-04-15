@@ -6,10 +6,10 @@ import numpy as np
 from pathlib2 import Path
 
 params = collections.OrderedDict([
-    ("num_cpgs", param(150254, name = 'num_cpgs')), # 150254
-    ("normalization", param('qf', name = 'normalization')), # 150254
+    ("num_cpgs", param(422801, name = 'num_cpgs')), # 150254 114674 422801
+    ("normalization", param('fn', name = 'normalization')), # qf fn
     ("geotypes", param(['Island'], name = 'geotypes')), # ONLY ISLANDS!!!
-    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
+    ("kde_mask", param('nonhealthy_mask', name = 'kde_mask')),
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
@@ -29,10 +29,13 @@ params = collections.OrderedDict([
 files = {
     "gene_chromosome": 'gene_chr.txt',
     #"x": 'average_beta.txt',
-    "x": 'GSE52588_beta_qf.txt',
-    "beta_values": 'GSE52588_beta_qf.npz',
+    "x": 'GSE52588_beta_fn.txt',
+    "beta_values": 'GSE52588_beta_fn.npz',
     "patients_info": "GSE52588_samples.txt",
-    "cells": "Down_beta_Funnorm_filtered_samples_MAge_Horvath_NEW_AgeCalculator.output.tsv",
+    "cells": "Down_beta_Funnorm_filtered_samples_MAge_Horvath_NEW_AgeCalculator.output.csv", 
+        # Down_beta_Funnorm_filtered_samples_MAge_Horvath_NEW_AgeCalculator.output.csv 
+        # Down_beta_Quantile_filtered_samples.output.csv 
+        # Down_beta_Noob_filtered_samples.output.csv
     "epimutations": "epimutations.txt",
     "down_related_2015_cpgs": "down_related_2015_cpgs.txt",
     "var_diff_pv": "var_diff_pv.npz",
@@ -53,7 +56,11 @@ files = {
     "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
     "down_phenotypes": "down_phenotypes",
     "down_epimutations": "down_epimutations",
-    "age_related": "age_related",
+    "age_related": Path("..") / "common" / "age_related",
+    "sex_related": Path("..") / "common" / "sex_related",
+    "singmann_sex_related": Path("..") / "common" / "sex_related" / "Singmann_metaanalysis_sex_Bonf_0.05.tsv",
+    "stripped_graphs": "stripped_graphs",
+    "stripped_parenclitic": Path("stripped_parenclitics") / "parenclitic",
 }
 
 params_sets = {
@@ -71,6 +78,7 @@ params_sets = {
     "parenclitic_boxplot": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
     "down_phenotypes": set(['normalization', 'num_cpgs']),
     "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "variance": set(['normalization', 'num_cpgs']),
     "age_related": set([]),
 }
 

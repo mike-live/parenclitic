@@ -30,6 +30,10 @@ def get_classes(config, X):
         mask[config.params["mongoloids_mask"].value] = -1
         mask[config.params["siblings_mask"].value] = 1
         mask[config.params["mothers_mask"].value] = 1
+    elif config.params["kde_mask"].value == "age_mask":
+        mask[config.params["mongoloids_mask"].value] = 2
+        mask[config.params["siblings_mask"].value] = -1
+        mask[config.params["mothers_mask"].value] = 1
     return y, mask
 
 def load_data_down_GSE52588():
@@ -65,13 +69,13 @@ def load_data_down_GSE52588():
 
     return X, y, mask, genes_names
 
-def load_data_down_GSE52588_cpgs():
+def load_data_down_GSE52588_cpgs(is_small = False):
     from configurations.config_down_GSE52588_cpg import config
     start = timeit.default_timer()
     import pandas as pd
-    X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter='\t', skip_header = 1)[:, 1:]
+    X = np.genfromtxt(config.ifname("x"), dtype='float32', delimiter='\t', skip_header = 0)[:, 1:]
 
-    cpgs_names  = np.genfromtxt(config.ifname("x"), dtype='str', skip_header = 1, usecols = 0)
+    cpgs_names = np.genfromtxt(config.ifname("x"), dtype='str', skip_header = 0, usecols = 0)
     config.params["num_cpgs"].value = min(cpgs_names.size, config.params["num_cpgs"].value)
 
     stop = timeit.default_timer()
@@ -80,29 +84,25 @@ def load_data_down_GSE52588_cpgs():
 
     sys.stdout.flush()
     
-    from annotations.cpgs import cpgs_annotation
-    cpgs = cpgs_annotation(config.ifname('cpgs_annotations'))
-    bad_cpgs = np.loadtxt(config.ifname('bad_cpgs'), dtype='str')
-    
-    import pandas as pd
-    #cpgs_info = pd.read_csv(config.ifname("cpgs_annotations"), delimiter='\t')
-    #cpgs_island = cpgs_info["ID_REF"][cpgs_info["RELATION_TO_UCSC_CPG_ISLAND"] == "Island"]
-    
-    #cpgs_all = np.array(cpgs_info["ID_REF"])
+    if is_small:
+        from annotations.cpgs import cpgs_annotation
+        cpgs = cpgs_annotation(config.ifname('cpgs_annotations'))
+        bad_cpgs = np.loadtxt(config.ifname('bad_cpgs'), dtype='str')
 
-    subset_cpg_names, ids = cpgs.get_cpgs({'gene_out': [np.NaN], 
-                                     'cpgs_in': cpgs_names, 
-                                     'chr_out': ['X', 'Y'], 
-                                     'geotype_in': ['Island'],
-                                     'cpgs_out': bad_cpgs})
-    cpgs_names, indices, _ = np.intersect1d(cpgs_names, subset_cpg_names, return_indices = True)
-    
-    #cpgs_island = np.array(cpgs_island)
-    #cpgs_names = np.array(cpgs_names)
-    #_, indices, _ = np.intersect1d(cpgs_names, cpgs_all, return_indices = True)
-    
-    #cpgs_names = cpgs_names[indices]
-    X = X[indices, :]
+        subset_cpg_names, ids = cpgs.get_cpgs({'gene_out': [np.NaN], 
+                                         'cpgs_in': cpgs_names, 
+                                         'chr_out': ['X', 'Y'], 
+                                         'geotype_in': ['Island'],
+                                         'cpgs_out': bad_cpgs})
+        cpgs_names, indices, _ = np.intersect1d(cpgs_names, subset_cpg_names, return_indices = True)
+
+        #cpgs_island = np.array(cpgs_island)
+        #cpgs_names = np.array(cpgs_names)
+        #_, indices, _ = np.intersect1d(cpgs_names, cpgs_all, return_indices = True)
+
+        #cpgs_names = cpgs_names[indices]
+        X = X[indices, :]
+        
     X = X.T
     
     good_cpgs = ~np.isnan(X).any(axis=0)
