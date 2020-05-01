@@ -691,7 +691,8 @@ class parenclitic:
         
     def calc_parenclitic(self, id_sample = None, need_weights = True, get_big = True):
         if id_sample is None:
-            for id_sample in range(self.num_samples):
+            from tqdm import tqdm
+            for id_sample in tqdm(range(self.num_samples), disable = not self.progress_bar):
                 self.calc_parenclitic(id_sample)
         else:
             g = self.get_graph(id_sample)
