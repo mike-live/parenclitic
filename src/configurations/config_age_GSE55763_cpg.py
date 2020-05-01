@@ -10,8 +10,8 @@ params = collections.OrderedDict([
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
-    ("min_score", param(0.85, name = 'min_score')),
-    ("max_score_1d", param(0.6, name = 'max_score_1d')),
+    ("min_score", param(0.9, name = 'min_score')),
+    ("max_score_1d", param(0.5, name = 'max_score_1d')),
     ("age_delimiter", param(38, name = 'age_delimiter')),
     #("num_groups", param(4, name = 'num_groups')),  
     ("id_part", param(value_be = 0, value_en = 29, num_ticks = 30, name = 'id_part')),
