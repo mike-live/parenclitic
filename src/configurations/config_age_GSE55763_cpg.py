@@ -44,18 +44,18 @@ files = {
 }
 
 params_sets = {
-    "graphs": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_part', 'num_parts']),
-    "graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_sample']),
-    "degrees": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule']),
-    "parenclitic": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule']),
-    "degrees_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_sample']),
-    "parenclitic_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_sample']),
-    "degrees_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule']),
-    "parenclitic_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule']),
-    "diff_graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule']),
-    "pair_genes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_pair']),
-    "kdes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_pair']),
-    "parenclitic_boxplot": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'id_parenclitic']),
+    "graphs": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_part', 'num_parts']),
+    "graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_sample']),
+    "degrees": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter']),
+    "parenclitic": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter']),
+    "degrees_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_sample']),
+    "parenclitic_sample": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_sample']),
+    "degrees_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter']),
+    "parenclitic_boxplots": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter']),
+    "diff_graph": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter']),
+    "pair_genes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_pair']),
+    "kdes": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_pair']),
+    "parenclitic_boxplot": set(['input', 'kde_mask', 'num_cpgs', 'algorithm', 'thr_type', 'division_rule', 'age_delimiter', 'id_parenclitic']),
 }
 
 config = configuration(params, info, files, data_name = 'GSE55763', project_name = 'Gerontology', config_name = 'age', params_sets = params_sets)
