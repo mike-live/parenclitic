@@ -2,11 +2,18 @@ import parenclitic
 import numpy as np
 import sys
 
-from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
-from configurations.config_down_GSE52588 import config
+#from configurations.load_data_down_GSE52588 import load_data_down_GSE52588
+#from configurations.config_down_GSE52588 import config
 
 #from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
 #from configurations.config_age_GSE87571 import config
+
+#from configurations.load_data_down_GSE52588 import load_data_down_GSE52588_cpgs
+#from configurations.config_down_GSE52588_cpg import config
+
+from configurations.load_data_age_GSE55763 import load_data_age_GSE55763_cpgs
+from configurations.config_age_GSE55763_cpg import config
+
 
 import multiprocessing as mp
 import multiprocessing, logging
@@ -19,20 +26,24 @@ if __name__ == "__main__":
     else:
         num_workers = 2
     print('Start with', num_workers, 'workers')
-    print('Graph path', config.ofname(["graphs", "g"], ext = ".tsv", include_set = config.params_sets["graph"]))
-    X, y, mask, all_features_names = load_data_down_GSE52588()
+    #X, y, mask, all_features_names = load_data_down_GSE52588()
     #X, y, mask, all_features_names, age = load_data_age_GSE87571()
+    #X, y, mask, all_features_names = load_data_down_GSE52588_cpgs(True)
+    X, y, mask, all_features_names, age = load_data_age_GSE55763_cpgs(True)
+
+    print('Graph path', config.ofname(["graphs", "g"], ext = ".tsv", include_set = config.params_sets["graph"]))
 
     import time
     num_samples = X.shape[0]
     num_features = X.shape[1]
     
     #by_group = config.params["by_group"].value
+    max_score_1d = config.params["max_score_1d"].value
     min_score = config.params["min_score"].value
     thr_type = config.params["thr_type"].value
     division_rule = config.params["division_rule"].value
     kernel = parenclitic.pdf_kernel(thr_type = thr_type, min_score = min_score, division_rule = division_rule)
-    pair_filter = parenclitic.IG_filter()
+    pair_filter = parenclitic.IG_filter(max_score = max_score_1d)
     clf = parenclitic.parenclitic(kernel = kernel, pair_filter = pair_filter, verbose = 0)
     # partition = parenclitic.graph_partition_subset()
     #clf = parenclitic.parenclitic(kernel = parenclitic.classifier_kernel(min_score = min_score, by_group = by_group)) # partition = parenclitic.graph_partition_subset()
