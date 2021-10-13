@@ -9,7 +9,7 @@ params = collections.OrderedDict([
     ("num_cpgs", param(422801, name = 'num_cpgs')), # 150254 114674 422801
     ("normalization", param('fn', name = 'normalization')), # qf fn
     ("geotypes", param(['Island'], name = 'geotypes')), # ONLY ISLANDS!!!
-    ("kde_mask", param('nonhealthy_mask', name = 'kde_mask')),
+    ("kde_mask", param('siblings_mask', name = 'kde_mask')),
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
@@ -61,6 +61,7 @@ files = {
     "singmann_sex_related": Path("..") / "common" / "sex_related" / "Singmann_metaanalysis_sex_Bonf_0.05.tsv",
     "stripped_graphs": "stripped_graphs",
     "stripped_parenclitic": Path("stripped_parenclitics") / "parenclitic",
+    "parenclitics_sieved": Path("parenclitics_sieved") / "parenclitic",
 }
 
 params_sets = {
@@ -76,6 +77,7 @@ params_sets = {
     "pair_genes": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
     "kdes": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
     "parenclitic_boxplot": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
+    "all_cpg_names": set(['num_cpgs']),
     "down_phenotypes": set(['normalization', 'num_cpgs']),
     "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
     "variance": set(['normalization', 'num_cpgs']),

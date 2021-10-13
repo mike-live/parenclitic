@@ -7,7 +7,7 @@ from pathlib2 import Path
 
 params = collections.OrderedDict([
     ("num_genes", param(14756, name = 'num_genes')), # 15024, 20270
-    ("kde_mask", param('mothers_mask', name = 'kde_mask')),
+    ("kde_mask", param('age_mask', name = 'kde_mask')),
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
@@ -48,6 +48,15 @@ files = {
     "kdes_dist": Path('kdes_dist') / 'kdes_dist',
     "parenclitic_boxplot": Path("parenclitic_boxplots") / "parenclitic_boxplot",
     "down_phenotypes": "down_phenotypes",
+    "cpgs_annotations": Path("..") / "common" / "cpgs_annotations.txt",
+    "age_related": Path("..") / "common" / "age_related",
+    "gene_subsets": "gene_subsets",
+    "synthetic": "synthetic",
+    "age_related": Path("..") / "common" / "age_related",
+    "sex_related": Path("..") / "common" / "sex_related",
+    "singmann_sex_related": Path("..") / "common" / "sex_related" / "Singmann_metaanalysis_sex_Bonf_0.05.tsv",
+    "stripped_graphs": "stripped_graphs",
+    "stripped_parenclitic": Path("stripped_parenclitics") / "parenclitic",
 }
 
 params_sets = {
@@ -64,6 +73,9 @@ params_sets = {
     "kdes": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
     "parenclitic_boxplot": set(['kde_mask', 'num_genes', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
     "down_phenotypes": set(['num_genes']),
+    "gene_subsets": set(['gene_subsets']),
+    "synthetic": set(['gene_subsets']),
+    "age_related": set([]),
 }
 
 config = configuration(params, info, files, data_name = 'GSE52588', project_name = 'Gerontology', config_name = 'down_syndrome', params_sets = params_sets)
