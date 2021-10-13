@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 import timeit
 import graphs_aux
-from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 
 feature_names = []
@@ -319,6 +318,7 @@ def parenclitic_feature_names():
     feature_names['mean_degrees'] = 'Mean degrees'
     feature_names['std_degrees'] = 'Std degrees'
     feature_names['zeros_degrees'] = 'Zeros degrees'
+    feature_names['nonzeros_degrees'] = 'Non-zeros degrees'
     
     feature_names['efficiency'] = 'Efficiency'
     feature_names['betweenness'] = 'Betweenness'
@@ -327,6 +327,7 @@ def parenclitic_feature_names():
     feature_names['mean_betweenness'] = 'Mean betweenness'
     feature_names['std_betweenness'] = 'Std betweenness'
     feature_names['zeros_betweenness'] = 'Zeros betweenness'
+    feature_names['nonzeros_betweenness'] = 'Non-zeros betweenness'
     
     feature_names['closeness'] = 'Closeness'
     feature_names['min_closeness'] = 'Min closeness'
@@ -334,6 +335,7 @@ def parenclitic_feature_names():
     feature_names['mean_closeness'] = 'Mean closeness'
     feature_names['std_closeness'] = 'Std closeness'
     feature_names['zeros_closeness'] = 'Zeros closeness'
+    feature_names['nonzeros_closeness'] = 'Non-zeros closeness'
     
     feature_names['pagerank'] = 'Pagerank'
     feature_names['min_pagerank'] = 'Min pagerank'
@@ -341,6 +343,7 @@ def parenclitic_feature_names():
     feature_names['mean_pagerank'] = 'Mean pagerank'
     feature_names['std_pagerank'] = 'Std pagerank'
     feature_names['zeros_pagerank'] = 'Zeros pagerank'
+    feature_names['nonzeros_pagerank'] = 'Non-zeros pagerank'
     
     feature_names['eigenvalues'] = 'Eigenvalues'
     feature_names['eigenvector_centrality'] = 'Eigenvector centrality'
@@ -349,6 +352,7 @@ def parenclitic_feature_names():
     feature_names['mean_eigenvector_centrality'] = 'Mean eigenvector centrality'
     feature_names['std_eigenvector_centrality'] = 'Std eigenvector centrality'
     feature_names['zeros_eigenvector_centrality'] = 'Zeros eigenvector centrality'
+    feature_names['nonzeros_eigenvector_centrality'] = 'Non-zeros eigenvector centrality'
 
     feature_names['num_edges'] = 'Number of edges'
     feature_names['num_nodes'] = 'Number of nodes'
@@ -370,6 +374,7 @@ def parenclitic_feature_names():
     feature_names['mean_weight'] = 'Mean weights'
     feature_names['std_weight'] = 'Std weights'
     feature_names['zeros_weight'] = 'Zeros weights'
+    feature_names['nonzeros_weight'] = 'Non-zeros weights'
     
     feature_names['community_edge_betweenness_optimal'] = 'Community edge betweenness: optimal count'
     

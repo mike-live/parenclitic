@@ -12,7 +12,6 @@ import igraph
 import pandas as pd
 import timeit
 #import graphs_aux
-from sklearn.neighbors.kde import KernelDensity
 from numpy import linalg as LA
 from sklearn import svm, datasets
 from scipy import stats
