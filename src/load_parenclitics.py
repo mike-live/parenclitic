@@ -3,9 +3,13 @@ import pandas as pd
 import os
 import scipy 
 
-def load_parenclitics(config, by_sample = False, id_thr = 0, from_mat = False):
+def load_parenclitics(config, by_sample = False, id_thr = 0, from_mat = False, names = None):
     if from_mat:
-        fname = config.ofname(["parenclitic"], ext = ".mat", include_set = config.params_sets["parenclitic"])
+        if names is None:
+            fname = config.ofname(["parenclitic"], ext = ".mat", include_set = config.params_sets["parenclitic"])
+        else:
+            fname = config.ofname(names, ext = ".mat", include_set = config.params_sets["parenclitic"])
+
         print(fname)
         data = scipy.io.loadmat(fname)
         parenclitics = data['parenclitics']

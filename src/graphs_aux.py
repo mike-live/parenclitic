@@ -52,7 +52,7 @@ def save_graph_as_csv(config, features_names = None, num_vertices = None, id_thr
     fname = config.ofname(["graphs", "g"], ext = '.csv', include_set = config.params_sets["graph"])
     graph_to_csv(g).to_csv(fname, sep = '\t')
 
-def graph_to_csv(g):
+def graph_to_dataframe(g, prefix = 'feature'):
     edges = np.array([e.tuple for e in g.es]).reshape((-1, 2)).astype(np.int32)
     df = pd.DataFrame()
     if "weight" in g.es:
@@ -62,8 +62,8 @@ def graph_to_csv(g):
     df["v2"] = edges[:, 1]
     if "label" in g.vs.attributes():
         labels = np.array(g.vs["label"])
-        df["gene_1"] = labels[edges[:, 0]]
-        df["gene_2"] = labels[edges[:, 1]]
+        df[prefix + "_1"] = labels[edges[:, 0]]
+        df[prefix + "_2"] = labels[edges[:, 1]]
     for attribute in g.es.attributes():
         df[attribute] = g.es[attribute]
     return df
