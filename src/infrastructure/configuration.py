@@ -138,7 +138,7 @@ class configuration:
         if type(names) is list:
             for name in names:
                 if type(name) is list:
-                    path /= delimiter.join([str(self.files.get(xname, xname)) for xname in name])
+                    path /= delimiter.join([str(self.files.get(xname, xname)) for xname in name if xname != ''])
                 else:
                     path /= self.files.get(name, name)
         else:
