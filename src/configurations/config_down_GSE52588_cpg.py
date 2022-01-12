@@ -13,9 +13,11 @@ params = collections.OrderedDict([
     ("algorithm", param('pdf', name = 'algorithm')), # svc, kde
     ("thr_type", param('best', name = 'thr_type')), # best, one
     ("division_rule", param('non_control', name = 'division_rule')), # non_control, atypical
+    ("LOO", param(value_be = 0, value_en = 28, num_ticks = 29, name = 'LOO')),
     #("thr_p", param(0.88, name = 'thr_p')),
     #("by_group", param(True, name = 'by_group')),
     ("min_score", param(0.9, name = 'min_score')),
+    ("max_score_1d", param(0.75, name = 'max_score_1d')),
     ("id_part", param(value_be = 0, value_en = 899, num_ticks = 900, name = 'id_part')),
     ("id_sample", param(value_be = 0, value_en = 86, num_ticks = 87, name = 'id_sample')),
     ("num_parts", param(900, name = 'num_parts')),
@@ -64,22 +66,23 @@ files = {
     "parenclitics_sieved": Path("parenclitics_sieved") / "parenclitic",
 }
 
+base_params = ['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'LOO'] #
 params_sets = {
-    "graphs": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_part', 'num_parts']),
-    "graph": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
-    "degrees": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
-    "parenclitic": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
-    "degrees_sample": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
-    "parenclitic_sample": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_sample']),
-    "degrees_boxplots": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
-    "parenclitic_boxplots": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
-    "diff_graph": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
-    "pair_genes": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
-    "kdes": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_pair']),
-    "parenclitic_boxplot": set(['kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule', 'id_parenclitic']),
+    "graphs": set(base_params + ['id_part', 'num_parts']),
+    "graph": set(base_params + ['id_sample']),
+    "degrees": set(base_params),
+    "parenclitic": set(base_params),
+    "degrees_sample": set(base_params + ['id_sample']),
+    "parenclitic_sample": set(base_params + ['id_sample']),
+    "degrees_boxplots": set(base_params),
+    "parenclitic_boxplots": set(base_params),
+    "diff_graph": set(base_params),
+    "pair_genes": set(base_params + ['id_pair']),
+    "kdes": set(base_params + ['id_pair']),
+    "parenclitic_boxplot": set(base_params + ['id_parenclitic']),
     "all_cpg_names": set(['num_cpgs']),
     "down_phenotypes": set(['normalization', 'num_cpgs']),
-    "down_epimutations": set(['normalization', 'kde_mask', 'num_cpgs', 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule']),
+    "down_epimutations": set(['normalization'] + base_params),
     "variance": set(['normalization', 'num_cpgs']),
     "age_related": set([]),
 }
