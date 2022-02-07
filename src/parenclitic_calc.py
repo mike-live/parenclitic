@@ -82,14 +82,16 @@ if __name__ == "__main__":
     #X, y, mask, all_features_names, age = load_data_age_GSE55763_cpgs(True)
     if "LOO" in config.params:
         for id_leave in tqdm(config.params["LOO"]):
+            if id_leave < 11:
+                continue
             maskc = mask.copy()
             for i in [0, 29, 29 * 2]:
                 value = mask[id_leave + i]
                 maskc[id_leave + i] = {-2: -2, -1: -2, 0: 0, 1: 2, 2: 2}[value]
             print(id_leave)
             print(maskc)
-            subset = get_edges_subset(config)
-            #subset = None
+            #subset = get_edges_subset(config)
+            subset = None
             build_parenclitic(X, y, maskc, all_features_names, num_workers, subset = subset)
     else:
         build_parenclitic(X, y, mask, all_features_names, num_workers)
