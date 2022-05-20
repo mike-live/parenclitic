@@ -385,6 +385,7 @@ class IG_filter:
         self.gain_information = gain_information
         self.num_good = int(np.sum((self.score <= self.max_score) & (self.gain_information <= self.max_IG)))
         self.iterable = iterable
+        print('Found good cpg sites:', self.num_good, ' / ', X.shape[1])
         
 
     def is_filtered(self, i, j):
@@ -441,22 +442,25 @@ class parallel_calc:
         data.kernel.fit(data.X[:, i], data.X[:, j], data.y, data.mask)
         m, d = data.kernel.get_edges()
         if m.any():
-            return m, d, i, j
+            return m, d, i, j, data.kernel.gain_information, data.kernel.score
         else:
-            return None
+            return None, data.kernel.gain_information, data.kernel.score
 
     def calc_batch(self, ids):
         res = []
         ok = False
+        max_score = 0, []
         for i, j in ids:
-            cur = self.calc_links(i, j)
+            *cur, gain_information, score = self.calc_links(i, j)
+            if score > max_score[0]:
+                max_score = score, (i, j)
             res.append(cur)
-            if not cur is None:
+            if cur != [None]:
                 ok = True
         if ok:
-            return np.array(res)
+            return res, max_score
         else:
-            return len(res)
+            return len(res), max_score
 
 class parenclitic:
     def __init__(self, partition = graph_partition(), kernel = classifier_kernel(), pair_filter = None, verbose = 0, progress_bar = 1):
@@ -520,8 +524,9 @@ class parenclitic:
                 self.pairs = self.pair_filter
             else:
                 self.pairs = self.partition
-    
-            global num_done, num_pairs
+
+            global num_done, num_pairs, all_max_score, f_pairs
+            all_max_score = 0, []
             num_done = 0
             num_pairs = len(self.pairs)
             each_progress = int(np.sqrt(num_pairs + 0.5))
@@ -544,22 +549,29 @@ class parenclitic:
                 ready = Semaphore(num_workers * queue_len)
             else:
                 my_parallel_calc.init(X, y, mask, self.kernel)
-                
+            
+            f_pairs = open('pairs.txt', 'w')
 
             def upd_graph(res):
-                global num_done, done_tasks, ready
+                global num_done, done_tasks, ready, all_max_score, f_pairs
                 if self.verbose == 1:
                     print('upd_graphs')
                     sys.stdout.flush()
+                res, max_score = res
+                if max_score[0] > all_max_score[0]:
+                    all_max_score = max_score
+                    print()
                 if not type(res) is int:
                     for cur in res:
-                        if not cur is None:
+                        if cur != [None]:
                             m, d, i, j = cur
                             #m, d = res.get_edges()
                             if m.any():
                                 M.append(m)
                                 D.append(d)
                                 E.append([i, j])
+                                print(f'{i}\t{j}', file=f_pairs)
+                                f_pairs.flush()
                     res = len(res)
                                 
                 if need_parallel:
@@ -567,7 +579,7 @@ class parenclitic:
                     ready.release()
     
                 if self.progress_bar:
-                    progress_bar.set_description('Number of edges: %i' % len(M), refresh = False)
+                    progress_bar.set_description(f'Number of edges: {len(M)} Max score: {all_max_score} Num done: {num_done} ', refresh = False)
                     progress_bar.update(res)
 
                 num_done += 1
@@ -639,6 +651,7 @@ class parenclitic:
                 self.D = np.array(D).T
                 self.E = np.array(E)
             self.is_fitted = True
+            f_pairs.close()
         except:
             if self.progress_bar:
                 progress_bar.close()
