@@ -8,11 +8,14 @@ import sys
 #from configurations.load_data_age_GSE87571 import load_data_age_GSE87571
 #from configurations.config_age_GSE87571 import config
 
-from configurations.load_data_down_GSE52588 import load_data_down_GSE52588_cpgs
-from configurations.config_down_GSE52588_cpg import config
+#from configurations.load_data_down_GSE52588 import load_data_down_GSE52588_cpgs
+#from configurations.config_down_GSE52588_cpg import config
 
 #from configurations.load_data_age_GSE55763 import load_data_age_GSE55763_cpgs
 #from configurations.config_age_GSE55763_cpg import config
+
+from configurations.load_data_schizophrenia import load_data_schizophrenia_cpgs
+from configurations.config_schizophrenia_cpg import config
 
 
 import multiprocessing as mp
@@ -46,7 +49,7 @@ def build_parenclitic(X, y, mask, all_features_names, num_workers, subset = None
     #clf = parenclitic.parenclitic(kernel = parenclitic.pdf_kernel(thr_p = 0.88))#, partition = parenclitic.graph_partition_subset())
     be = time.time()
     #clf.fit(X, y, mask, num_workers = 5)
-    clf.fit(X[:, :], y[:], mask[:], num_workers = num_workers, chunk_size = 1000, subset = subset)
+    clf.fit(X[:, :], y[:], mask[:], num_workers = num_workers, chunk_size = 100, subset = subset)
     en = time.time()
     print(en - be)
     #clf.calc_parenclitic()
@@ -64,7 +67,10 @@ def build_parenclitic(X, y, mask, all_features_names, num_workers, subset = None
     clf.save_graphs(gtype = 'npz')
 
 def get_edges_subset(config):
-    file_name = config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])    
+    min_score = config.params['min_score'].value
+    config.params['min_score'].value = (config.params['min_score'].value * 100 - 1) / 100
+    file_name = config.ofname(["graphs", "g"], ext = ".npz", include_set = config.params_sets["graph"])
+    config.params['min_score'].value = min_score
     print(file_name)
     data = np.load(file_name)
     print(np.array(data['E']).shape)
@@ -78,12 +84,11 @@ if __name__ == "__main__":
     print('Start with', num_workers, 'workers')
     #X, y, mask, all_features_names = load_data_down_GSE52588()
     #X, y, mask, all_features_names, age = load_data_age_GSE87571()
-    X, y, mask, all_features_names = load_data_down_GSE52588_cpgs(True)
+    #X, y, mask, all_features_names = load_data_down_GSE52588_cpgs(True)
+    X, y, mask, all_features_names = load_data_schizophrenia_cpgs(True)
     #X, y, mask, all_features_names, age = load_data_age_GSE55763_cpgs(True)
     if "LOO" in config.params:
         for id_leave in tqdm(config.params["LOO"]):
-            if id_leave < 11:
-                continue
             maskc = mask.copy()
             for i in [0, 29, 29 * 2]:
                 value = mask[id_leave + i]
@@ -93,5 +98,13 @@ if __name__ == "__main__":
             #subset = get_edges_subset(config)
             subset = None
             build_parenclitic(X, y, maskc, all_features_names, num_workers, subset = subset)
+    elif "min_scores" in config.params:
+        for min_score in tqdm(config.params["min_scores"]):
+            config.params['min_score'].value = round(min_score, 2)
+            subset = get_edges_subset(config)
+            #subset = None
+            build_parenclitic(X, y, mask, all_features_names, num_workers, subset = subset)
     else:
-        build_parenclitic(X, y, mask, all_features_names, num_workers)
+        #subset = get_edges_subset(config)
+        subset = None
+        build_parenclitic(X, y, mask, all_features_names, num_workers, subset = subset)
