@@ -24,7 +24,7 @@ from tqdm import tqdm
 #mpl = multiprocessing.log_to_stderr()
 #mpl.setLevel(logging.DEBUG)
 
-def build_parenclitic(X, y, mask, all_features_names, num_workers, subset = None):
+def build_parenclitic(config, X, y, mask, all_features_names, num_workers, subset = None):
     print('Graph path', config.ofname(["graphs", "g"], ext = ".tsv", include_set = config.params_sets["graph"]))
 
     import time
@@ -97,6 +97,7 @@ if __name__ == "__main__":
             print(maskc)
             #subset = get_edges_subset(config)
             subset = None
+<<<<<<< HEAD
             build_parenclitic(X, y, maskc, all_features_names, num_workers, subset = subset)
     elif "min_scores" in config.params:
         for min_score in tqdm(config.params["min_scores"]):
@@ -108,3 +109,8 @@ if __name__ == "__main__":
         #subset = get_edges_subset(config)
         subset = None
         build_parenclitic(X, y, mask, all_features_names, num_workers, subset = subset)
+=======
+            build_parenclitic(config, X, y, maskc, all_features_names, num_workers, subset = subset)
+    else:
+        build_parenclitic(config, X, y, mask, all_features_names, num_workers)
+>>>>>>> bff58a576418d463f79501d68d645d19633a0c3b
