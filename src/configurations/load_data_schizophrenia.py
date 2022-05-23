@@ -2,7 +2,7 @@ import timeit
 import numpy as np
 from sklearn.model_selection import train_test_split
 import sys
-
+import pandas as pd
 
 def get_classes(config, X):
     y = np.zeros((X.shape[0], ), dtype = 'int8')
@@ -17,20 +17,24 @@ def get_classes(config, X):
         mask[config.params["schizophrenia_mask"].value] = -1
     return y, mask
 
-
-def load_data_schizophrenia_cpgs(is_small = False):
+def load_data_schizophrenia_cpgs(is_small=False, is_train=True):
     from configurations.config_schizophrenia_cpg import config
-    import pandas as pd
-    import pickle
+    
+    #import pickle
     
     start = timeit.default_timer()
-    with open(config.ifname('beta_values'), 'rb') as fp:
-        X = pickle.load(fp)
+    #with open(config.ifname('beta_values'), 'rb') as fp:
+    #    X = pickle.load(fp)
+    if is_train:
+        X = pd.read_pickle(config.ifname('beta_values'))
+    else:
+        X = pd.read_pickle(config.ifname('beta_values_full'))
+    
     config.params["control_mask"].value = X['Status'].values == 'Control'
     config.params["schizophrenia_mask"].value = X['Status'].values == 'Schizophrenia'
-
     cpgs_names = X.columns
-    X = X.values[:, 2:].astype('float32')
+    X = X.iloc[:, 2:].values.astype('float32')
+    print('3')
     #X = X[:, :100]
     #cpgs_names = cpgs_names[:100]
 
@@ -53,13 +57,15 @@ def load_data_schizophrenia_cpgs(is_small = False):
         cpgs_names, indices, _ = np.intersect1d(cpgs_names, subset_cpg_names, return_indices = True)
         X = X[:, indices]
     
-    good_cpgs = ~np.isnan(X).any(axis=0)
+    good_cpgs = ~np.isnan(X[:config.params["num_train"].value]).any(axis=0)
     X = X[:, good_cpgs]
     cpgs_names = cpgs_names[good_cpgs]
     print(X.shape)
     
     config.params["num_cpgs"].value = min(X.shape[1], config.params["num_cpgs"].value)
     y, mask = get_classes(config, X)
+    if not is_train:
+        mask[config.params["num_train"].value:] *= 2
 
     print(X.shape, config.params["num_cpgs"].value, y.shape, cpgs_names.shape)
     print('Fraction of zeros in y', (y == 0).mean())

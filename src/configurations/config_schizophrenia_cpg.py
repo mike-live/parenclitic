@@ -19,10 +19,11 @@ params = collections.OrderedDict([
     ("min_score", param(0.6, name = 'min_score')),
     ("max_score_1d", param(0.65, name = 'max_score_1d')),
     ("id_part", param(value_be = 0, value_en = 899, num_ticks = 900, name = 'id_part')),
-    ("id_sample", param(value_be = 0, value_en = 1521, num_ticks = 1522, name = 'id_sample')),
+    ("id_sample", param(value_be = 0, value_en = 3007, num_ticks = 3008, name = 'id_sample')),
     ("num_parts", param(900, name = 'num_parts')),
     ("num_workers", param(10, name = 'num_workers')),
-    ("num_samples", param(1522, name = 'num_samples')),
+    ("num_samples", param(3008, name = 'num_samples')),
+    ("num_train", param(1522, name = 'num_samples')),
     ("control_mask", param([], name = 'control_mask')),
     ("schizophrenia_mask", param([], name = 'schizoprenia_mask')),
 ])
@@ -30,6 +31,7 @@ params = collections.OrderedDict([
 files = {
     "gene_chromosome": 'gene_chr.txt',
     "beta_values": 'data_trn_val.pkl',
+    "beta_values_full": 'full_data_trn_test_val_union.pkl',
     "patients_info": "pheno_trn_val.xlsx",
     "g": 'graph',
     "cpgs_annotations": Path("..") / "common" / "cpgs_annotations.txt",
