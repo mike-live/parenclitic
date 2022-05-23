@@ -16,6 +16,7 @@ params = collections.OrderedDict([
     #("LOO", param(value_be = 0, value_en = 28, num_ticks = 29, name = 'LOO')),
     #("thr_p", param(0.88, name = 'thr_p')),
     #("by_group", param(True, name = 'by_group')),
+    ("is_full", param(True, name = 'is_full')),
     ("min_score", param(0.6, name = 'min_score')),
     ("max_score_1d", param(0.65, name = 'max_score_1d')),
     ("id_part", param(value_be = 0, value_en = 899, num_ticks = 900, name = 'id_part')),
@@ -56,7 +57,7 @@ files = {
     "parenclitics_sieved": Path("parenclitics_sieved") / "parenclitic",
 }
 
-base_params = ['kde_mask', 'num_cpgs'] # 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule'
+base_params = ['kde_mask', 'num_cpgs', 'is_full'] # 'algorithm', 'by_group', 'thr_p', 'thr_type', 'division_rule'
 params_sets = {
     "graphs": set(base_params + ['id_part', 'num_parts']),
     "graph": set(base_params + ['id_sample']),
